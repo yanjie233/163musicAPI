@@ -4,148 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>网易云音乐歌单下载器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
             max-width: 800px;
             margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
         }
-        h1 {
-            text-align: center;
+        select, input, button {
+            margin: 10px 0;
+            padding: 5px;
         }
-        #playlistInput, #songCountInput {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        #output {
-            white-space: pre-wrap;
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
+        #output, #downloadLinks {
             margin-top: 20px;
         }
-        button, select {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        #downloadLinks {
-            margin-top: 20px;
-        }
-        #downloadLinks a {
-            display: block;
-            margin-bottom: 5px;
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>网易云音乐歌单下载器</h1>
-    <input type="text" id="playlistInput" placeholder="输入歌单 ID">
-    <select id="songCountSelect" onchange="updateSongCountInput()">
+    
+    <select id="songCount">
+        <option value="all" selected>全部</option>
         <option value="10">10首</option>
         <option value="30">30首</option>
         <option value="50">50首</option>
         <option value="100">100首</option>
         <option value="custom">自定义</option>
     </select>
-    <input type="number" id="songCountInput" placeholder="输入自定义歌曲数量（1-1000）" style="display: none;" min="1" max="1000">
-    <button onclick="fetchPlaylist()">获取歌单信息</button>
-    <button onclick="generateDownloadLinks()" id="generateLinksButton" disabled>生成下载链接</button>
+    
+    <input type="number" id="customCount" style="display: none;" placeholder="输入自定义数量">
+    
+    <select id="lyricsOption">
+        <option value="yes">需要歌词</option>
+        <option value="no">不需要歌词</option>
+    </select>
+    
+    <input type="text" id="playlistId" placeholder="输入歌单ID">
+    <button onclick="getPlaylist()">获取歌单信息</button>
+    
     <div id="output"></div>
     <div id="downloadLinks"></div>
+    
+    <button id="generateTxt" style="display: none;" onclick="generateTxt('links')">生成下载链接txt</button>
+    <button id="generateLyricsTxt" style="display: none;" onclick="generateTxt('lyrics')">生成歌词txt</button>
 
     <script>
-        let playlistTracks = [];
+        let songs = [];
 
-        function updateSongCountInput() {
-            const select = document.getElementById('songCountSelect');
-            const input = document.getElementById('songCountInput');
-            input.style.display = select.value === 'custom' ? 'block' : 'none';
-        }
+        document.getElementById('songCount').addEventListener('change', function() {
+            document.getElementById('customCount').style.display = 
+                this.value === 'custom' ? 'inline-block' : 'none';
+        });
 
-        async function fetchPlaylist() {
-            const playlistId = document.getElementById('playlistInput').value.trim();
-            const output = document.getElementById('output');
-            output.textContent = '正在获取歌单信息...';
-            playlistTracks = [];
+        async function getPlaylist() {
+            const playlistId = document.getElementById('playlistId').value;
+            const songCount = document.getElementById('songCount').value;
+            const customCount = document.getElementById('customCount').value;
+            const needLyrics = document.getElementById('lyricsOption').value === 'yes';
+            
+            let limit = songCount === 'all' ? 1000 : 
+                        songCount === 'custom' ? customCount : songCount;
 
             try {
-                const response = await fetch(`/playlist/detail?id=${playlistId}`);
-                const data = await response.json();
-
-                if (data.code === 200 && data.playlist && data.playlist.tracks) {
-                    const tracks = data.playlist.tracks;
-                    output.textContent = `已获取歌单信息，共 ${tracks.length} 首歌曲\n\n`;
-                    playlistTracks = tracks.map(track => ({
-                        id: track.id,
-                        name: track.name,
-                        artists: track.ar.map(artist => artist.name).join(', ')
-                    }));
-                    playlistTracks.forEach((track, index) => {
-                        output.textContent += `${index + 1}. ${track.name} - ${track.artists}\n`;
-                    });
-                    document.getElementById('generateLinksButton').disabled = false;
-                } else {
-                    output.textContent = '无法获取歌单信息或歌单为空';
-                }
+                const response = await axios.get(`https://163.520985.top/playlist/detail?id=${playlistId}`);
+                songs = response.data.playlist.tracks.slice(0, limit);
+                
+                let output = `<h2>歌单信息</h2>`;
+                output += `<p>歌单名称: ${response.data.playlist.name}</p>`;
+                output += `<p>歌曲数量: ${songs.length}</p>`;
+                
+                document.getElementById('output').innerHTML = output;
+                
+                generateDownloadLinks(needLyrics);
             } catch (error) {
-                output.textContent = `获取歌单信息时出错: ${error.message}`;
+                console.error('Error:', error);
+                document.getElementById('output').innerHTML = '获取歌单信息失败';
             }
         }
 
-        async function generateDownloadLinks() {
-            const output = document.getElementById('output');
-            const downloadLinks = document.getElementById('downloadLinks');
-            downloadLinks.innerHTML = '';
-            output.textContent = '正在生成下载链接...';
-
-            const select = document.getElementById('songCountSelect');
-            const input = document.getElementById('songCountInput');
-            let songCount = parseInt(select.value);
-            if (select.value === 'custom') {
-                songCount = parseInt(input.value);
-                if (isNaN(songCount) || songCount < 1 || songCount > 1000) {
-                    output.textContent = '请输入有效的歌曲数量（1-1000）';
-                    return;
+        async function generateDownloadLinks(needLyrics) {
+            let links = '';
+            for (let song of songs) {
+                links += `<p>${song.name} - ${song.ar[0].name}: `;
+                links += `<a href="https://music.163.com/song/media/outer/url?id=${song.id}.mp3" target="_blank">下载链接</a>`;
+                
+                if (needLyrics) {
+                    try {
+                        const lyricsResponse = await axios.get(`https://163.520985.top/lyric?id=${song.id}`);
+                        const lyrics = lyricsResponse.data.lrc.lyric;
+                        links += ` <button onclick="showLyrics('${song.id}', '${song.name}')">显示歌词</button>`;
+                        song.lyrics = lyrics;
+                    } catch (error) {
+                        console.error('Error fetching lyrics:', error);
+                        links += ' (无法获取歌词)';
+                    }
                 }
+                
+                links += '</p>';
             }
-
-            const tracksToDownload = playlistTracks.slice(0, songCount);
-            const trackIds = tracksToDownload.map(track => track.id).join(',');
-
-            try {
-                const response = await fetch(`/song/url?id=${trackIds}`);
-                const data = await response.json();
-
-                if (data.code === 200 && data.data) {
-                    const urlMap = new Map(data.data.map(item => [item.id, item.url]));
-
-                    tracksToDownload.forEach(track => {
-                        const url = urlMap.get(track.id);
-                        if (url) {
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.download = `${track.name} - ${track.artists}.mp3`;
-                            link.textContent = `下载 ${track.name} - ${track.artists}`;
-                            downloadLinks.appendChild(link);
-                        } else {
-                            output.textContent += `无法获取 "${track.name}" 的下载链接(请确保你已登录，已登录出现此选择代表网易云无版权)\n`;
-                        }
-                    });
-
-                    output.textContent += '\n下载链接生成完成，请点击链接开始下载。';
-                } else {
-                    output.textContent = '无法获取歌曲下载链接(请确保你已登录，已登录出现此选择代表网易云无版权)';
-                }
-            } catch (error) {
-                output.textContent = `获取下载链接时出错: ${error.message}`;
+            
+            document.getElementById('downloadLinks').innerHTML = links;
+            document.getElementById('generateTxt').style.display = 'block';
+            if (needLyrics) {
+                document.getElementById('generateLyricsTxt').style.display = 'block';
             }
+        }
+
+        function showLyrics(songId, songName) {
+            const song = songs.find(s => s.id == songId);
+            if (song && song.lyrics) {
+                alert(`${songName} 的歌词：\n\n${song.lyrics}`);
+            } else {
+                alert('无法显示歌词');
+            }
+        }
+
+        function generateTxt(type) {
+            let content = '';
+            if (type === 'links') {
+                content = songs.map(song => `https://music.163.com/song/media/outer/url?id=${song.id}.mp3`).join('\n');
+            } else if (type === 'lyrics') {
+                content = songs.map(song => `${song.name} - ${song.ar[0].name}\n${song.lyrics || '无歌词'}\n\n`).join('');
+            }
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = type === 'links' ? 'download_links.txt' : 'lyrics.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>

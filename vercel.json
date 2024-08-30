@@ -13,3 +13,9 @@
     }
   ]
 }
+{
+  "routes": [
+    { "src": "/playlist-downloader", "dest": "/playlist-downloader.html" },
+    { "src": "/(.*)", "dest": "/index.js" }
+  ]
+}

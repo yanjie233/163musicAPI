@@ -146,9 +146,9 @@
                         }
                     });
 
-                    output.textContent += '\n下载链接生成完成，请点击链接开始下载。<br>(请确保你已登录，如已登录出现无法获取则代表是 数字专辑、账号非VIP、网易云无版权)';
+                    output.textContent += '\n下载链接获取完成(如您已登录仍然出现无法获取则代表是 歌曲是 数字专辑、您的账号非VIP、网易云无版权)';
                 } else {
-                    output.textContent = '无法获取歌曲下载链接';
+                    output.textContent = '无法获取歌曲下载链接(请确保你已登录，如已登录出现无法获取则代表是 数字专辑、账号非VIP、网易云无版权)';
                 }
             } catch (error) {
                 output.textContent = `获取下载链接时出错: ${error.message}`;

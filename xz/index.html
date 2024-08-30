@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歌单歌曲 URL 提取器</title>
+    <title>歌单歌曲 URL 提取器和下载器</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,19 +16,37 @@
             background-color: #f4f4f4;
             padding: 10px;
             border-radius: 5px;
+            margin-top: 20px;
+        }
+        button {
+            margin-right: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #downloadLinks {
+            margin-top: 20px;
+        }
+        #downloadLinks a {
+            display: block;
+            margin-bottom: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>歌单歌曲 URL 提取器</h1>
+    <h1>歌单歌曲 URL 提取器和下载器</h1>
     <button onclick="fetchAndProcessPlaylist()">获取歌曲 URL</button>
+    <button onclick="batchDownload()" id="downloadButton" disabled>批量下载歌曲</button>
     <div id="output"></div>
+    <div id="downloadLinks"></div>
 
     <script>
+        let songUrls = [];
+
         async function fetchAndProcessPlaylist() {
             const playlistUrl = 'https://163.520985.top/playlist/detail?id=3088951057';
             const output = document.getElementById('output');
             output.textContent = '正在获取歌单信息...';
+            songUrls = [];
 
             try {
                 const response = await fetch(playlistUrl);
@@ -48,7 +66,11 @@
                             
                             if (songData.code === 200 && songData.data && songData.data[0]) {
                                 const url = songData.data[0].url;
-                                output.textContent += `歌曲ID: ${songId}, URL: ${url}\n`;
+                                const type = songData.data[0].type || 'mp3'; // 默认为 mp3 如果 type 不存在
+                                output.textContent += `歌曲ID: ${songId}, URL: ${url}, 类型: ${type}\n`;
+                                if (url) {
+                                    songUrls.push({id: songId, url: url, name: track.name, type: type});
+                                }
                             } else {
                                 output.textContent += `歌曲ID: ${songId}, 无法获取 URL\n`;
                             }
@@ -56,12 +78,28 @@
                             output.textContent += `歌曲ID: ${songId}, 获取 URL 时出错: ${error.message}\n`;
                         }
                     }
+                    document.getElementById('downloadButton').disabled = false;
                 } else {
                     output.textContent = '无法获取歌单信息或歌单为空';
                 }
             } catch (error) {
                 output.textContent = `获取歌单信息时出错: ${error.message}`;
             }
+        }
+
+        function batchDownload() {
+            const downloadLinks = document.getElementById('downloadLinks');
+            downloadLinks.innerHTML = '';
+
+            songUrls.forEach(song => {
+                const link = document.createElement('a');
+                link.href = song.url;
+                link.download = `${song.name}.${song.type}`; // 使用 API 返回的 type
+                link.textContent = `下载 ${song.name} (${song.type})`;
+                downloadLinks.appendChild(link);
+            });
+
+            alert('下载链接已生成。请点击每个链接来下载歌曲。');
         }
     </script>
 </body>

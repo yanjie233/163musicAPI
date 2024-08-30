@@ -11,12 +11,10 @@
     }
   ],
   "routes": [
-   {
-  "rewrites": [
     {
-      "source": "/musicxz",
-      "destination": "/web/music-xz.html"
-    }
+      "src": "/musicxz",
+      "dest": "/web/music-xz.html"
+    },
     {
       "src": "/(.*)",
       "dest": "/index.js"

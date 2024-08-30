@@ -1,9 +1,10 @@
 {
-  "name": "NeteaseCloudMusicApi",
-  "version": "4.22.0",
-  "description": "网易云音乐 NodeJS 版 API",
+  "name": "163musicapi",
+  "version": "1.0.0",
+  "description": "Netease Music API",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node index.js",
     "test": "mocha -r intelli-espower-loader -t 60000 server.test.js main.test.js --exit",
     "lint": "eslint \"**/*.{js,ts}\"",
     "lint-fix": "eslint --fix \"**/*.{js,ts}\"",
@@ -39,7 +40,6 @@
     "音乐",
     "网易云音乐nodejs"
   ],
-  "main": "main.js",
   "types": "./interface.d.ts",
   "engines": {
     "node": ">=12"

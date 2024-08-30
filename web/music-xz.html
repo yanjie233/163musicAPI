@@ -50,6 +50,7 @@
 </head>
 <body>
     <h1>网易云音乐歌单下载器</h1>
+    <button onclick="downloadTxtFile()" id="downloadTxtButton" disabled>下载全部链接的文本文件</button>
     <input type="text" id="playlistInput" placeholder="输入歌单 ID">
     <select id="songCountSelect" onchange="updateSongCountInput()">
         <option value="all">全部</option>
@@ -69,6 +70,7 @@
 
     <script>
         let playlistTracks = [];
+        let allLinks = '';  // 全局变量存储所有下载链接
 
         function updateSongCountInput() {
             const select = document.getElementById('songCountSelect');
@@ -111,6 +113,7 @@
             const downloadLinks = document.getElementById('downloadLinks');
             downloadLinks.innerHTML = '';
             output.textContent = '正在生成下载链接...';
+            allLinks = '';  // 重置链接字符串
 
             const select = document.getElementById('songCountSelect');
             const input = document.getElementById('customCount');
@@ -132,32 +135,23 @@
 
                 if (data.code === 200 && data.data) {
                     const urlMap = new Map(data.data.map(item => [item.id, item.url]));
-                    let allLinks = '';  // 初始化一个字符串用来存储所有下载链接
 
                     tracksToDownload.forEach(track => {
                         const url = urlMap.get(track.id);
                         if (url) {
-                            const linkText = `下载 ${track.name} - ${track.artists}: ${url}\n`;
-                            allLinks += linkText;  // 将每个链接追加到字符串中
+                            allLinks += `${url}\n`;  // 仅存储链接
 
                             const link = document.createElement('a');
                             link.href = url;
                             link.download = `${track.name} - ${track.artists}.mp3`;
-                            link.textContent = linkText;
+                            link.textContent = `下载 ${track.name} - ${track.artists}`;
                             downloadLinks.appendChild(link);
                         } else {
                             output.textContent += `无法获取 "${track.name}" 的下载链接\n`;
                         }
                     });
 
-                    // 生成txt文件下载
-                    const blob = new Blob([allLinks], { type: 'text/plain' });
-                    const txtLink = document.createElement('a');
-                    txtLink.href = URL.createObjectURL(blob);
-                    txtLink.download = 'download_links.txt';
-                    txtLink.textContent = '下载全部链接的文本文件';
-                    downloadLinks.appendChild(txtLink);
-
+                    document.getElementById('downloadTxtButton').disabled = false; // 启用下载按钮
                     output.textContent += '\n下载链接获取完成';
                 } else {
                     output.textContent = '无法获取歌曲下载链接(请确保你已登录)';
@@ -165,6 +159,14 @@
             } catch (error) {
                 output.textContent = `获取下载链接时出错: ${error.message}`;
             }
+        }
+
+        function downloadTxtFile() {
+            const blob = new Blob([allLinks], { type: 'text/plain' });
+            const txtLink = document.createElement('a');
+            txtLink.href = URL.createObjectURL(blob);
+            txtLink.download = 'download_links.txt';
+            txtLink.click();
         }
     </script>
 </body>

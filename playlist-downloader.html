@@ -16,7 +16,7 @@
         h1 {
             text-align: center;
         }
-        #playlistInput {
+        #playlistInput, #songCountInput {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -28,7 +28,7 @@
             border-radius: 5px;
             margin-top: 20px;
         }
-        button {
+        button, select {
             display: block;
             width: 100%;
             padding: 10px;
@@ -47,6 +47,14 @@
 <body>
     <h1>网易云音乐歌单下载器</h1>
     <input type="text" id="playlistInput" placeholder="输入歌单 ID">
+    <select id="songCountSelect" onchange="updateSongCountInput()">
+        <option value="10">10首</option>
+        <option value="30">30首</option>
+        <option value="50">50首</option>
+        <option value="100">100首</option>
+        <option value="custom">自定义</option>
+    </select>
+    <input type="number" id="songCountInput" placeholder="输入自定义歌曲数量（1-1000）" style="display: none;" min="1" max="1000">
     <button onclick="fetchPlaylist()">获取歌单信息</button>
     <button onclick="generateDownloadLinks()" id="generateLinksButton" disabled>生成下载链接</button>
     <div id="output"></div>
@@ -54,6 +62,12 @@
 
     <script>
         let playlistTracks = [];
+
+        function updateSongCountInput() {
+            const select = document.getElementById('songCountSelect');
+            const input = document.getElementById('songCountInput');
+            input.style.display = select.value === 'custom' ? 'block' : 'none';
+        }
 
         async function fetchPlaylist() {
             const playlistId = document.getElementById('playlistInput').value.trim();
@@ -91,27 +105,47 @@
             downloadLinks.innerHTML = '';
             output.textContent = '正在生成下载链接...';
 
-            for (const track of playlistTracks) {
-                try {
-                    const response = await fetch(`/song/url?id=${track.id}`);
-                    const data = await response.json();
-
-                    if (data.code === 200 && data.data && data.data[0] && data.data[0].url) {
-                        const url = data.data[0].url;
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `${track.name} - ${track.artists}.mp3`;
-                        link.textContent = `下载 ${track.name} - ${track.artists}`;
-                        downloadLinks.appendChild(link);
-                    } else {
-                        output.textContent += `无法获取 "${track.name}" 的下载链接\n`;
-                    }
-                } catch (error) {
-                    output.textContent += `获取 "${track.name}" 的下载链接时出错: ${error.message}\n`;
+            const select = document.getElementById('songCountSelect');
+            const input = document.getElementById('songCountInput');
+            let songCount = parseInt(select.value);
+            if (select.value === 'custom') {
+                songCount = parseInt(input.value);
+                if (isNaN(songCount) || songCount < 1 || songCount > 1000) {
+                    output.textContent = '请输入有效的歌曲数量（1-1000）';
+                    return;
                 }
             }
 
-            output.textContent += '\n下载链接生成完成，请点击链接开始下载。';
+            const tracksToDownload = playlistTracks.slice(0, songCount);
+            const trackIds = tracksToDownload.map(track => track.id).join(',');
+
+            try {
+                const response = await fetch(`/song/url?id=${trackIds}`);
+                const data = await response.json();
+
+                if (data.code === 200 && data.data) {
+                    const urlMap = new Map(data.data.map(item => [item.id, item.url]));
+
+                    tracksToDownload.forEach(track => {
+                        const url = urlMap.get(track.id);
+                        if (url) {
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `${track.name} - ${track.artists}.mp3`;
+                            link.textContent = `下载 ${track.name} - ${track.artists}`;
+                            downloadLinks.appendChild(link);
+                        } else {
+                            output.textContent += `无法获取 "${track.name}" 的下载链接\n`;
+                        }
+                    });
+
+                    output.textContent += '\n下载链接生成完成，请点击链接开始下载。';
+                } else {
+                    output.textContent = '无法获取歌曲下载链接(请确保你已登录，已登录出现此选择代表网易云无版权)';
+                }
+            } catch (error) {
+                output.textContent = `获取下载链接时出错: ${error.message}`;
+            }
         }
     </script>
 </body>

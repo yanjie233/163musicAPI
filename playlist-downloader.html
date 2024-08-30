@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网易云音乐歌单下载器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+        }
+        #playlistInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #output {
+            white-space: pre-wrap;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        #downloadLinks {
+            margin-top: 20px;
+        }
+        #downloadLinks a {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>网易云音乐歌单下载器</h1>
+    <input type="text" id="playlistInput" placeholder="输入歌单 ID">
+    <button onclick="fetchPlaylist()">获取歌单信息</button>
+    <button onclick="generateDownloadLinks()" id="generateLinksButton" disabled>生成下载链接</button>
+    <div id="output"></div>
+    <div id="downloadLinks"></div>
+
+    <script>
+        let playlistTracks = [];
+
+        async function fetchPlaylist() {
+            const playlistId = document.getElementById('playlistInput').value.trim();
+            const output = document.getElementById('output');
+            output.textContent = '正在获取歌单信息...';
+            playlistTracks = [];
+
+            try {
+                const response = await fetch(`/playlist/detail?id=${playlistId}`);
+                const data = await response.json();
+
+                if (data.code === 200 && data.playlist && data.playlist.tracks) {
+                    const tracks = data.playlist.tracks;
+                    output.textContent = `已获取歌单信息，共 ${tracks.length} 首歌曲\n\n`;
+                    playlistTracks = tracks.map(track => ({
+                        id: track.id,
+                        name: track.name,
+                        artists: track.ar.map(artist => artist.name).join(', ')
+                    }));
+                    playlistTracks.forEach((track, index) => {
+                        output.textContent += `${index + 1}. ${track.name} - ${track.artists}\n`;
+                    });
+                    document.getElementById('generateLinksButton').disabled = false;
+                } else {
+                    output.textContent = '无法获取歌单信息或歌单为空';
+                }
+            } catch (error) {
+                output.textContent = `获取歌单信息时出错: ${error.message}`;
+            }
+        }
+
+        async function generateDownloadLinks() {
+            const output = document.getElementById('output');
+            const downloadLinks = document.getElementById('downloadLinks');
+            downloadLinks.innerHTML = '';
+            output.textContent = '正在生成下载链接...';
+
+            for (const track of playlistTracks) {
+                try {
+                    const response = await fetch(`/song/url?id=${track.id}`);
+                    const data = await response.json();
+
+                    if (data.code === 200 && data.data && data.data[0] && data.data[0].url) {
+                        const url = data.data[0].url;
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `${track.name} - ${track.artists}.mp3`;
+                        link.textContent = `下载 ${track.name} - ${track.artists}`;
+                        downloadLinks.appendChild(link);
+                    } else {
+                        output.textContent += `无法获取 "${track.name}" 的下载链接\n`;
+                    }
+                } catch (error) {
+                    output.textContent += `获取 "${track.name}" 的下载链接时出错: ${error.message}\n`;
+                }
+            }
+
+            output.textContent += '\n下载链接生成完成，请点击链接开始下载。';
+        }
+    </script>
+</body>
+</html>

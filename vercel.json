@@ -8,12 +8,16 @@
     {
       "src": "*.html",
       "use": "@vercel/static"
+    },
+    {
+      "src": "web/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/musicxz",
-      "dest": "web/music-xz.html"
+      "dest": "/web/music-xz.html"
     },
     {
       "src": "/(.*)",

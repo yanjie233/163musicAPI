@@ -5,62 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>网易云音乐歌单下载器</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #C20C0C;
+            --secondary-color: #242424;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            line-height: 1.6;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
         select, input, button {
-            margin: 10px 0;
-            padding: 5px;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #A00A0A;
         }
         #output, #downloadLinks {
+            background-color: white;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .song-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .song-item:last-child {
+            border-bottom: none;
+        }
+        .song-info {
+            flex-grow: 1;
+        }
+        .song-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .song-actions a, .song-actions button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        #generateTxt, #generateLyricsTxt {
             margin-top: 20px;
         }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
         @media (max-width: 600px) {
-            body {
+            .container {
                 padding: 10px;
+            }
+            .song-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .song-actions {
+                margin-top: 10px;
             }
         }
     </style>
 </head>
 <body>
-    <h1>网易云音乐歌单下载器</h1>
-    
-    <select id="songCount">
-        <option value="all" selected>全部</option>
-        <option value="10">10首</option>
-        <option value="30">30首</option>
-        <option value="50">50首</option>
-        <option value="100">100首</option>
-        <option value="custom">自定义</option>
-    </select>
-    
-    <input type="number" id="customCount" style="display: none;" placeholder="输入自定义数量">
-    
-    <select id="lyricsOption">
-        <option value="yes">需要歌词</option>
-        <option value="no">不需要歌词</option>
-    </select>
-    
-    <input type="text" id="playlistId" placeholder="输入歌单ID">
-    <button onclick="getPlaylist()">获取歌单信息</button>
-    
-    <div id="output"></div>
-    <div id="downloadLinks"></div>
-    
-    <button id="generateTxt" style="display: none;" onclick="generateTxt('links')">生成下载链接txt</button>
-    <button id="generateLyricsTxt" style="display: none;" onclick="generateTxt('lyrics')">生成歌词txt</button>
+    <div class="container">
+        <h1>网易云音乐歌单下载器</h1>
+        
+        <div class="input-group">
+            <label for="songCount">选择歌曲数量：</label>
+            <select id="songCount">
+                <option value="all" selected>全部</option>
+                <option value="10">10首</option>
+                <option value="30">30首</option>
+                <option value="50">50首</option>
+                <option value="100">100首</option>
+                <option value="custom">自定义</option>
+            </select>
+        </div>
+        
+        <div class="input-group" id="customCountGroup" style="display: none;">
+            <label for="customCount">自定义歌曲数量：</label>
+            <input type="number" id="customCount" placeholder="输入自定义数量">
+        </div>
+        
+        <div class="input-group">
+            <label for="lyricsOption">是否需要歌词：</label>
+            <select id="lyricsOption">
+                <option value="yes">需要歌词</option>
+                <option value="no">不需要歌词</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="playlistId">歌单ID：</label>
+            <input type="text" id="playlistId" placeholder="输入歌单ID">
+        </div>
+        
+        <button onclick="getPlaylist()">获取歌单信息</button>
+        
+        <div id="output"></div>
+        <div id="downloadLinks"></div>
+        
+        <button id="generateTxt" style="display: none;" onclick="generateTxt('links')">
+            <i class="fas fa-file-download"></i> 生成下载链接txt
+        </button>
+        <button id="generateLyricsTxt" style="display: none;" onclick="generateTxt('lyrics')">
+            <i class="fas fa-file-alt"></i> 生成歌词txt
+        </button>
+    </div>
 
     <script>
         let songs = [];
 
         document.getElementById('songCount').addEventListener('change', function() {
-            document.getElementById('customCount').style.display = 
-                this.value === 'custom' ? 'inline-block' : 'none';
+            document.getElementById('customCountGroup').style.display = 
+                this.value === 'custom' ? 'block' : 'none';
         });
 
         async function getPlaylist() {
@@ -72,6 +178,9 @@
             let limit = songCount === 'all' ? 1000 : 
                         songCount === 'custom' ? customCount : songCount;
 
+            document.getElementById('output').innerHTML = '<div class="loading">正在加载歌单信息...</div>';
+            document.getElementById('downloadLinks').innerHTML = '';
+
             try {
                 const response = await axios.get(`https://163.520985.top/playlist/detail?id=${playlistId}`);
                 songs = response.data.playlist.tracks.slice(0, limit);
@@ -82,38 +191,44 @@
                 
                 document.getElementById('output').innerHTML = output;
                 
-                generateDownloadLinks(needLyrics);
+                await generateDownloadLinks(needLyrics);
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('output').innerHTML = '获取歌单信息失败';
+                document.getElementById('output').innerHTML = '<div class="error">获取歌单信息失败</div>';
             }
         }
 
         async function generateDownloadLinks(needLyrics) {
             let links = '';
             for (let song of songs) {
-                links += `<p>${song.name} - ${song.ar[0].name}: `;
-                links += `<a href="https://music.163.com/song/media/outer/url?id=${song.id}.mp3" target="_blank">下载链接</a>`;
+                links += `<div class="song-item fade-in">
+                    <div class="song-info">${song.name} - ${song.ar[0].name}</div>
+                    <div class="song-actions">
+                        <a href="https://music.163.com/song/media/outer/url?id=${song.id}.mp3" target="_blank" class="btn-download">
+                            <i class="fas fa-download"></i> 下载
+                        </a>`;
                 
                 if (needLyrics) {
                     try {
                         const lyricsResponse = await axios.get(`https://163.520985.top/lyric?id=${song.id}`);
                         const lyrics = lyricsResponse.data.lrc.lyric;
-                        links += ` <button onclick="showLyrics('${song.id}', '${song.name}')">显示歌词</button>`;
+                        links += `<button onclick="showLyrics('${song.id}', '${song.name}')">
+                            <i class="fas fa-align-left"></i> 歌词
+                        </button>`;
                         song.lyrics = lyrics;
                     } catch (error) {
                         console.error('Error fetching lyrics:', error);
-                        links += ' (无法获取歌词)';
+                        links += '<span class="error">(无法获取歌词)</span>';
                     }
                 }
                 
-                links += '</p>';
+                links += '</div></div>';
             }
             
             document.getElementById('downloadLinks').innerHTML = links;
-            document.getElementById('generateTxt').style.display = 'block';
+            document.getElementById('generateTxt').style.display = 'inline-block';
             if (needLyrics) {
-                document.getElementById('generateLyricsTxt').style.display = 'block';
+                document.getElementById('generateLyricsTxt').style.display = 'inline-block';
             }
         }
 

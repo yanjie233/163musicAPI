@@ -83,6 +83,7 @@
         .song-actions a, .song-actions button {
             padding: 5px 10px;
             font-size: 14px;
+            width: auto;
         }
         #generateTxt, #generateLyricsTxt {
             margin-top: 20px;
@@ -100,6 +101,23 @@
         .fade-in {
             animation: fadeIn 0.5s ease-in;
         }
+        .btn-download {
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .btn-download:hover {
+            background-color: #45a049;
+        }
+        .btn-lyrics {
+            background-color: #2196F3;
+        }
+        .btn-lyrics:hover {
+            background-color: #1E88E5;
+        }
         @media (max-width: 600px) {
             .container {
                 padding: 10px;
@@ -110,6 +128,8 @@
             }
             .song-actions {
                 margin-top: 10px;
+                width: 100%;
+                justify-content: space-between;
             }
         }
     </style>
@@ -212,7 +232,7 @@
                     try {
                         const lyricsResponse = await axios.get(`https://163.520985.top/lyric?id=${song.id}`);
                         const lyrics = lyricsResponse.data.lrc.lyric;
-                        links += `<button onclick="showLyrics('${song.id}', '${song.name}')">
+                        links += `<button onclick="showLyrics('${song.id}', '${song.name}')" class="btn-lyrics">
                             <i class="fas fa-align-left"></i> 歌词
                         </button>`;
                         song.lyrics = lyrics;

@@ -4,294 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>网易云音乐歌单下载器</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #C20C0C;
-            --secondary-color: #242424;
-            --background-color: #f5f5f5;
-            --text-color: #333;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
+            font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            line-height: 1.6;
         }
         h1 {
-            color: var(--primary-color);
             text-align: center;
-            margin-bottom: 30px;
         }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        select, input, button {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        select, input[type="number"], button {
+            margin: 10px 0;
+            padding: 5px;
             font-size: 16px;
         }
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #A00A0A;
-        }
         #output, #downloadLinks {
-            background-color: white;
-            border-radius: 4px;
-            padding: 20px;
             margin-top: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
-        .song-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+        #songList {
+            list-style-type: none;
+            padding: 0;
         }
-        .song-item:last-child {
-            border-bottom: none;
-        }
-        .song-info {
-            flex-grow: 1;
-        }
-        .song-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .song-actions button {
-            padding: 5px 10px;
-            font-size: 14px;
-            width: auto;
-        }
-        #generateTxt, #generateLyricsTxt {
-            margin-top: 20px;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-style: italic;
-            color: #666;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        .btn-download {
-            background-color: #4CAF50;
-        }
-        .btn-download:hover {
-            background-color: #45a049;
-        }
-        .btn-lyrics {
-            background-color: #2196F3;
-        }
-        .btn-lyrics:hover {
-            background-color: #1E88E5;
+        #songList li {
+            margin-bottom: 5px;
         }
         @media (max-width: 600px) {
-            .container {
+            body {
                 padding: 10px;
-            }
-            .song-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .song-actions {
-                margin-top: 10px;
-                width: 100%;
-                justify-content: space-between;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>网易云音乐歌单下载器</h1>
-        
-        <div class="input-group">
-            <label for="songCount">选择歌曲数量：</label>
-            <select id="songCount">
-                <option value="all" selected>全部</option>
-                <option value="10">10首</option>
-                <option value="30">30首</option>
-                <option value="50">50首</option>
-                <option value="100">100首</option>
-                <option value="custom">自定义</option>
-            </select>
-        </div>
-        
-        <div class="input-group" id="customCountGroup" style="display: none;">
-            <label for="customCount">自定义歌曲数量：</label>
-            <input type="number" id="customCount" placeholder="输入自定义数量">
-        </div>
-        
-        <div class="input-group">
-            <label for="lyricsOption">是否需要歌词：</label>
-            <select id="lyricsOption">
-                <option value="yes">需要歌词</option>
-                <option value="no">不需要歌词</option>
-            </select>
-        </div>
-        
-        <div class="input-group">
-            <label for="playlistId">歌单ID：</label>
-            <input type="text" id="playlistId" placeholder="输入歌单ID">
-        </div>
-        
-        <button onclick="getPlaylist()">获取歌单信息</button>
-        
-        <div id="output"></div>
-        <div id="downloadLinks"></div>
-        
-        <button id="generateTxt" style="display: none;" onclick="generateTxt('links')">
-            <i class="fas fa-file-download"></i> 生成下载链接txt
-        </button>
-        <button id="generateLyricsTxt" style="display: none;" onclick="generateTxt('lyrics')">
-            <i class="fas fa-file-alt"></i> 生成歌词txt
-        </button>
-    </div>
+    <h1>网易云音乐歌单下载器</h1>
+    <select id="songCount">
+        <option value="all">全部</option>
+        <option value="10">10首</option>
+        <option value="30">30首</option>
+        <option value="50">50首</option>
+        <option value="100">100首</option>
+        <option value="custom">自定义</option>
+    </select>
+    <input type="number" id="customCount" style="display: none;" min="1" placeholder="输入歌曲数量">
+    <button onclick="getSongList()">获取歌单信息</button>
+    <button onclick="generateDownloadLinks()">生成下载链接</button>
+    <button onclick="downloadTxtFile()">下载TXT文件</button>
+
+    <div id="output"></div>
+    <div id="downloadLinks"></div>
+    <ul id="songList"></ul>
 
     <script>
         let songs = [];
 
-        document.getElementById('songCount').addEventListener('change', function() {
-            document.getElementById('customCountGroup').style.display = 
-                this.value === 'custom' ? 'block' : 'none';
-        });
-
-        async function getPlaylist() {
-            const playlistId = document.getElementById('playlistId').value;
+        function getSongList() {
             const songCount = document.getElementById('songCount').value;
             const customCount = document.getElementById('customCount').value;
-            const needLyrics = document.getElementById('lyricsOption').value === 'yes';
-            
-            let limit = songCount === 'all' ? 1000 : 
-                        songCount === 'custom' ? customCount : songCount;
+            const count = songCount === 'custom' ? customCount : songCount;
 
-            document.getElementById('output').innerHTML = '<div class="loading">正在加载歌单信息...</div>';
-            document.getElementById('downloadLinks').innerHTML = '';
+            // 模拟获取歌单信息
+            songs = Array.from({length: count === 'all' ? 100 : parseInt(count)}, (_, i) => ({
+                name: `歌曲${i + 1}`,
+                artist: `歌手${i + 1}`,
+                link: `https://example.com/download/song${i + 1}.mp3`
+            }));
 
-            try {
-                const response = await axios.get(`https://163.520985.top/playlist/detail?id=${playlistId}`);
-                songs = response.data.playlist.tracks.slice(0, limit);
-                
-                let output = `<h2>歌单信息</h2>`;
-                output += `<p>歌单名称: ${response.data.playlist.name}</p>`;
-                output += `<p>歌曲数量: ${songs.length}</p>`;
-                
-                document.getElementById('output').innerHTML = output;
-                
-                await generateDownloadLinks(needLyrics);
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('output').innerHTML = '<div class="error">获取歌单信息失败</div>';
-            }
+            document.getElementById('output').textContent = `已获取 ${songs.length} 首歌曲信息`;
         }
 
-        async function generateDownloadLinks(needLyrics) {
-            let links = '';
-            for (let song of songs) {
-                links += `<div class="song-item fade-in">
-                    <div class="song-info">${song.name} - ${song.ar[0].name}</div>
-                    <div class="song-actions">
-                        <button onclick="downloadSong('${song.id}', '${song.name}')" class="btn-download">
-                            <i class="fas fa-download"></i> 下载
-                        </button>`;
-                
-                if (needLyrics) {
-                    try {
-                        const lyricsResponse = await axios.get(`https://163.520985.top/lyric?id=${song.id}`);
-                        const lyrics = lyricsResponse.data.lrc.lyric;
-                        links += `<button onclick="showLyrics('${song.id}', '${song.name}')" class="btn-lyrics">
-                            <i class="fas fa-align-left"></i> 歌词
-                        </button>`;
-                        song.lyrics = lyrics;
-                    } catch (error) {
-                        console.error('Error fetching lyrics:', error);
-                        links += '<span class="error">(无法获取歌词)</span>';
-                    }
-                }
-                
-                links += '</div></div>';
-            }
-            
-            document.getElementById('downloadLinks').innerHTML = links;
-            document.getElementById('generateTxt').style.display = 'inline-block';
-            if (needLyrics) {
-                document.getElementById('generateLyricsTxt').style.display = 'inline-block';
-            }
+        function generateDownloadLinks() {
+            const downloadLinks = document.getElementById('downloadLinks');
+            const songList = document.getElementById('songList');
+            downloadLinks.textContent = '';
+            songList.innerHTML = '';
+
+            songs.forEach((song, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${song.name} - ${song.artist}`;
+                const showLinkBtn = document.createElement('button');
+                showLinkBtn.textContent = '显示链接';
+                showLinkBtn.onclick = () => showSongLink(index);
+                li.appendChild(showLinkBtn);
+                songList.appendChild(li);
+            });
         }
 
-        async function downloadSong(songId, songName) {
-            try {
-                const response = await axios.get(`https://music.163.com/song/media/outer/url?id=${songId}.mp3`, {
-                    responseType: 'blob'
-                });
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', `${songName}.mp3`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } catch (error) {
-                console.error('Error downloading song:', error);
-                alert('下载歌曲失败，请稍后重试。');
-            }
+        function showSongLink(index) {
+            const song = songs[index];
+            alert(`下载链接：${song.link}`);
         }
 
-        function showLyrics(songId, songName) {
-            const song = songs.find(s => s.id == songId);
-            if (song && song.lyrics) {
-                alert(`${songName} 的歌词：\n\n${song.lyrics}`);
-            } else {
-                alert('无法显示歌词');
-            }
-        }
-
-        function generateTxt(type) {
-            let content = '';
-            if (type === 'links') {
-                content = songs.map(song => `https://music.163.com/song/media/outer/url?id=${song.id}.mp3`).join('\n');
-            } else if (type === 'lyrics') {
-                content = songs.map(song => `${song.name} - ${song.ar[0].name}\n${song.lyrics || '无歌词'}\n\n`).join('');
-            }
-            
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
+        function downloadTxtFile() {
+            const content = songs.map(song => `${song.name} - ${song.artist}\n${song.link}`).join('\n\n');
+            const blob = new Blob([content], {type: 'text/plain'});
             const a = document.createElement('a');
-            a.href = url;
-            a.download = type === 'links' ? 'download_links.txt' : 'lyrics.txt';
-            document.body.appendChild(a);
+            a.href = URL.createObjectURL(blob);
+            a.download = '歌曲下载链接.txt';
             a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
+
+        document.getElementById('songCount').addEventListener('change', function() {
+            document.getElementById('customCount').style.display = this.value === 'custom' ? 'inline-block' : 'none';
+        });
     </script>
 </body>
 </html>

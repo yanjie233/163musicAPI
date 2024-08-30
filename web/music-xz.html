@@ -15,15 +15,18 @@
         h1 {
             text-align: center;
         }
-        select, input[type="number"], button {
+        #playlistInput, #songCountSelect, #customCount, button {
+            display: block;
+            width: 100%;
             margin: 10px 0;
-            padding: 5px;
+            padding: 10px;
             font-size: 16px;
         }
         #output, #downloadLinks {
             margin-top: 20px;
-            border: 1px solid #ccc;
+            background-color: #f4f4f4;
             padding: 10px;
+            border-radius: 5px;
             white-space: pre-wrap;
             word-wrap: break-word;
         }
@@ -32,6 +35,10 @@
             padding: 0;
         }
         #songList li {
+            margin-bottom: 5px;
+        }
+        #downloadLinks a {
+            display: block;
             margin-bottom: 5px;
         }
         @media (max-width: 600px) {
@@ -43,7 +50,8 @@
 </head>
 <body>
     <h1>网易云音乐歌单下载器</h1>
-    <select id="songCount">
+    <input type="text" id="playlistInput" placeholder="输入歌单 ID">
+    <select id="songCountSelect" onchange="updateSongCountInput()">
         <option value="all">全部</option>
         <option value="10">10首</option>
         <option value="30">30首</option>
@@ -51,67 +59,101 @@
         <option value="100">100首</option>
         <option value="custom">自定义</option>
     </select>
-    <input type="number" id="customCount" style="display: none;" min="1" placeholder="输入歌曲数量">
-    <button onclick="getSongList()">获取歌单信息</button>
-    <button onclick="generateDownloadLinks()">生成下载链接</button>
-    <button onclick="downloadTxtFile()">下载TXT文件</button>
+    <input type="number" id="customCount" placeholder="输入自定义歌曲数量（1-1000）" style="display: none;" min="1" max="1000">
+    <button onclick="fetchPlaylist()">获取歌单信息</button>
+    <button onclick="generateDownloadLinks()" id="generateLinksButton" disabled>生成下载链接</button>
 
     <div id="output"></div>
     <div id="downloadLinks"></div>
     <ul id="songList"></ul>
 
     <script>
-        let songs = [];
+        let playlistTracks = [];
 
-        function getSongList() {
-            const songCount = document.getElementById('songCount').value;
-            const customCount = document.getElementById('customCount').value;
-            const count = songCount === 'custom' ? customCount : songCount;
-
-            // 模拟获取歌单信息
-            songs = Array.from({length: count === 'all' ? 100 : parseInt(count)}, (_, i) => ({
-                name: `歌曲${i + 1}`,
-                artist: `歌手${i + 1}`,
-                link: `https://example.com/download/song${i + 1}.mp3`
-            }));
-
-            document.getElementById('output').textContent = `已获取 ${songs.length} 首歌曲信息`;
+        function updateSongCountInput() {
+            const select = document.getElementById('songCountSelect');
+            const input = document.getElementById('customCount');
+            input.style.display = select.value === 'custom' ? 'block' : 'none';
         }
 
-        function generateDownloadLinks() {
+        async function fetchPlaylist() {
+            const playlistId = document.getElementById('playlistInput').value.trim();
+            const output = document.getElementById('output');
+            output.textContent = '正在获取歌单信息...';
+            playlistTracks = [];
+
+            try {
+                const response = await fetch(`/playlist/detail?id=${playlistId}`);
+                const data = await response.json();
+
+                if (data.code === 200 && data.playlist && data.playlist.tracks) {
+                    const tracks = data.playlist.tracks;
+                    output.textContent = `已获取歌单信息，共 ${tracks.length} 首歌曲\n\n`;
+                    playlistTracks = tracks.map(track => ({
+                        id: track.id,
+                        name: track.name,
+                        artists: track.ar.map(artist => artist.name).join(', ')
+                    }));
+                    playlistTracks.forEach((track, index) => {
+                        output.textContent += `${index + 1}. ${track.name} - ${track.artists}\n`;
+                    });
+                    document.getElementById('generateLinksButton').disabled = false;
+                } else {
+                    output.textContent = '无法获取歌单信息或歌单为空';
+                }
+            } catch (error) {
+                output.textContent = `获取歌单信息时出错: ${error.message}`;
+            }
+        }
+
+        async function generateDownloadLinks() {
+            const output = document.getElementById('output');
             const downloadLinks = document.getElementById('downloadLinks');
-            const songList = document.getElementById('songList');
-            downloadLinks.textContent = '';
-            songList.innerHTML = '';
+            downloadLinks.innerHTML = '';
+            output.textContent = '正在生成下载链接...';
 
-            songs.forEach((song, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${song.name} - ${song.artist}`;
-                const showLinkBtn = document.createElement('button');
-                showLinkBtn.textContent = '显示链接';
-                showLinkBtn.onclick = () => showSongLink(index);
-                li.appendChild(showLinkBtn);
-                songList.appendChild(li);
-            });
+            const select = document.getElementById('songCountSelect');
+            const input = document.getElementById('customCount');
+            let songCount = select.value === 'all' ? playlistTracks.length : parseInt(select.value);
+            if (select.value === 'custom') {
+                songCount = parseInt(input.value);
+                if (isNaN(songCount) || songCount < 1 || songCount > 1000) {
+                    output.textContent = '请输入有效的歌曲数量（1-1000）';
+                    return;
+                }
+            }
+
+            const tracksToDownload = playlistTracks.slice(0, songCount);
+            const trackIds = tracksToDownload.map(track => track.id).join(',');
+
+            try {
+                const response = await fetch(`/song/url?id=${trackIds}`);
+                const data = await response.json();
+
+                if (data.code === 200 && data.data) {
+                    const urlMap = new Map(data.data.map(item => [item.id, item.url]));
+
+                    tracksToDownload.forEach(track => {
+                        const url = urlMap.get(track.id);
+                        if (url) {
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `${track.name} - ${track.artists}.mp3`;
+                            link.textContent = `下载 ${track.name} - ${track.artists}`;
+                            downloadLinks.appendChild(link);
+                        } else {
+                            output.textContent += `无法获取 "${track.name}" 的下载链接(请确保你已登录，已登录出现此选择代表网易云无版权)\n`;
+                        }
+                    });
+
+                    output.textContent += '\n下载链接生成完成，请点击链接开始下载。';
+                } else {
+                    output.textContent = '无法获取歌曲下载链接(请确保你已登录，已登录出现此选择代表网易云无版权)';
+                }
+            } catch (error) {
+                output.textContent = `获取下载链接时出错: ${error.message}`;
+            }
         }
-
-        function showSongLink(index) {
-            const song = songs[index];
-            alert(`下载链接：${song.link}`);
-        }
-
-        function downloadTxtFile() {
-            const content = songs.map(song => `${song.name} - ${song.artist}\n${song.link}`).join('\n\n');
-            const blob = new Blob([content], {type: 'text/plain'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = '歌曲下载链接.txt';
-            a.click();
-        }
-
-        document.getElementById('songCount').addEventListener('change', function() {
-            document.getElementById('customCount').style.display = this.value === 'custom' ? 'inline-block' : 'none';
-        });
     </script>
 </body>
 </html>

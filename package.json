@@ -100,12 +100,3 @@
     "typescript": "4.5.2"
   }
 }
-{
-  "name": "163musicapi",
-  "version": "1.0.0",
-  "description": "Netease Music API",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  }
-}

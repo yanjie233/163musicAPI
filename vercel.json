@@ -12,8 +12,8 @@
   ],
   "routes": [
     {
-      "src": "/playlist-downloader",
-      "dest": "/playlist-downloader.html"
+      "src": "/musicxz",
+      "dest": "/web/music-xz.html"
     },
     {
       "src": "/(.*)",

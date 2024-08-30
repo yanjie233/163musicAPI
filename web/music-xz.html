@@ -142,13 +142,13 @@
                             link.textContent = `下载 ${track.name} - ${track.artists}`;
                             downloadLinks.appendChild(link);
                         } else {
-                            output.textContent += `无法获取 "${track.name}" 的下载链接(请确保你已登录，已登录出现此选择代表网易云无版权)\n`;
+                            output.textContent += `无法获取 "${track.name}" 的下载链接\n`;
                         }
                     });
 
-                    output.textContent += '\n下载链接生成完成，请点击链接开始下载。';
+                    output.textContent += '\n下载链接生成完成，请点击链接开始下载。<br>(请确保你已登录，如已登录出现无法获取则代表是 数字专辑、账号非VIP、网易云无版权)';
                 } else {
-                    output.textContent = '无法获取歌曲下载链接(请确保你已登录，已登录出现此选择代表网易云无版权)';
+                    output.textContent = '无法获取歌曲下载链接';
                 }
             } catch (error) {
                 output.textContent = `获取下载链接时出错: ${error.message}`;

@@ -106,54 +106,63 @@
             }
         }
 
-        async function generateDownloadLinks() {
-            const output = document.getElementById('output');
-            const downloadLinks = document.getElementById('downloadLinks');
-            downloadLinks.innerHTML = '';
-            output.textContent = '正在生成下载链接...';
+async function generateDownloadLinks() {
+    const output = document.getElementById('output');
+    const downloadLinks = document.getElementById('downloadLinks');
+    downloadLinks.innerHTML = '';
+    output.textContent = '正在生成下载链接...';
 
-            const select = document.getElementById('songCountSelect');
-            const input = document.getElementById('customCount');
-            let songCount = select.value === 'all' ? playlistTracks.length : parseInt(select.value);
-            if (select.value === 'custom') {
-                songCount = parseInt(input.value);
-                if (isNaN(songCount) || songCount < 1 || songCount > 1000) {
-                    output.textContent = '请输入有效的歌曲数量（1-1000）';
-                    return;
-                }
-            }
-
-            const tracksToDownload = playlistTracks.slice(0, songCount);
-            const trackIds = tracksToDownload.map(track => track.id).join(',');
-
-            try {
-                const response = await fetch(`/song/url?id=${trackIds}`);
-                const data = await response.json();
-
-                if (data.code === 200 && data.data) {
-                    const urlMap = new Map(data.data.map(item => [item.id, item.url]));
-
-                    tracksToDownload.forEach(track => {
-                        const url = urlMap.get(track.id);
-                        if (url) {
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.download = `${track.name} - ${track.artists}.mp3`;
-                            link.textContent = `下载 ${track.name} - ${track.artists}`;
-                            downloadLinks.appendChild(link);
-                        } else {
-                            output.textContent += `无法获取 "${track.name}" 的下载链接\n`;
-                        }
-                    });
-
-                    output.textContent += '\n下载链接获取完成(如您已登录仍然出现无法获取则代表是 歌曲是 数字专辑、您的账号非VIP、网易云无版权)';
-                } else {
-                    output.textContent = '无法获取歌曲下载链接(请确保你已登录，如已登录出现无法获取则代表是 数字专辑、账号非VIP、网易云无版权)';
-                }
-            } catch (error) {
-                output.textContent = `获取下载链接时出错: ${error.message}`;
-            }
+    const select = document.getElementById('songCountSelect');
+    const input = document.getElementById('customCount');
+    let songCount = select.value === 'all' ? playlistTracks.length : parseInt(select.value);
+    if (select.value === 'custom') {
+        songCount = parseInt(input.value);
+        if (isNaN(songCount) || songCount < 1 || songCount > 1000) {
+            output.textContent = '请输入有效的歌曲数量（1-1000）';
+            return;
         }
-    </script>
-</body>
-</html>
+    }
+
+    const tracksToDownload = playlistTracks.slice(0, songCount);
+    const trackIds = tracksToDownload.map(track => track.id).join(',');
+
+    try {
+        const response = await fetch(`/song/url?id=${trackIds}`);
+        const data = await response.json();
+
+        if (data.code === 200 && data.data) {
+            const urlMap = new Map(data.data.map(item => [item.id, item.url]));
+            let allLinks = '';  // 初始化一个字符串用来存储所有下载链接
+
+            tracksToDownload.forEach(track => {
+                const url = urlMap.get(track.id);
+                if (url) {
+                    const linkText = `下载 ${track.name} - ${track.artists}: ${url}\n`;
+                    allLinks += linkText;  // 将每个链接追加到字符串中
+
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${track.name} - ${track.artists}.mp3`;
+                    link.textContent = linkText;
+                    downloadLinks.appendChild(link);
+                } else {
+                    output.textContent += `无法获取 "${track.name}" 的下载链接\n`;
+                }
+            });
+
+            // 生成txt文件下载
+            const blob = new Blob([allLinks], { type: 'text/plain' });
+            const txtLink = document.createElement('a');
+            txtLink.href = URL.createObjectURL(blob);
+            txtLink.download = 'download_links.txt';
+            txtLink.textContent = '下载全部链接的文本文件';
+            downloadLinks.appendChild(txtLink);
+
+            output.textContent += '\n下载链接获取完成';
+        } else {
+            output.textContent = '无法获取歌曲下载链接(请确保你已登录)';
+        }
+    } catch (error) {
+        output.textContent = `获取下载链接时出错: ${error.message}`;
+    }
+}

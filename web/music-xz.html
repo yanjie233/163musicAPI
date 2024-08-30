@@ -80,7 +80,7 @@
             display: flex;
             gap: 10px;
         }
-        .song-actions a, .song-actions button {
+        .song-actions button {
             padding: 5px 10px;
             font-size: 14px;
             width: auto;
@@ -103,11 +103,6 @@
         }
         .btn-download {
             background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
         }
         .btn-download:hover {
             background-color: #45a049;
@@ -224,9 +219,9 @@
                 links += `<div class="song-item fade-in">
                     <div class="song-info">${song.name} - ${song.ar[0].name}</div>
                     <div class="song-actions">
-                        <a href="https://music.163.com/song/media/outer/url?id=${song.id}.mp3" target="_blank" class="btn-download">
+                        <button onclick="downloadSong('${song.id}', '${song.name}')" class="btn-download">
                             <i class="fas fa-download"></i> 下载
-                        </a>`;
+                        </button>`;
                 
                 if (needLyrics) {
                     try {
@@ -249,6 +244,24 @@
             document.getElementById('generateTxt').style.display = 'inline-block';
             if (needLyrics) {
                 document.getElementById('generateLyricsTxt').style.display = 'inline-block';
+            }
+        }
+
+        async function downloadSong(songId, songName) {
+            try {
+                const response = await axios.get(`https://music.163.com/song/media/outer/url?id=${songId}.mp3`, {
+                    responseType: 'blob'
+                });
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `${songName}.mp3`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Error downloading song:', error);
+                alert('下载歌曲失败，请稍后重试。');
             }
         }
 

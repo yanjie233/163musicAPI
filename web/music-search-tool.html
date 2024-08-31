@@ -78,7 +78,7 @@
     <h1>音乐搜索和下载工具</h1>
 
     <button id="loginButton">扫码登录</button>
-<br>
+
     <form id="searchForm">
         <input type="text" id="searchInput" placeholder="输入歌曲名称或作者" required>
         
@@ -120,8 +120,8 @@
         const loginButton = document.getElementById('loginButton');
 
         loginButton.addEventListener('click', () => {
-            alert('请使用网易云APP扫码登录');
-            window.location.href = 'https://520985.top';
+            alert('请使用网易云APP扫码登录，显示登录完成返回此处即可！');
+            window.location.href = 'https://163.520985.top/qrlogin.html';
         });
 
         searchForm.addEventListener('submit', async (e) => {

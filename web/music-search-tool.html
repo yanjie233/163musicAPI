@@ -50,10 +50,35 @@
             color: #888;
             font-style: italic;
         }
+        #warning {
+            background-color: #ffcccc;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        #loginButton {
+            background-color: #007bff;
+        }
+        #disclaimer {
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <h1>网易云音乐搜索和下载工具</h1>
+    <div id="warning">
+        本站仅供交流学习<br>使用前请点击"扫码登录"按钮进行登录，否则无法下载会员歌曲
+    </div>
+
+    <h1>音乐搜索和下载工具</h1>
+
+    <button id="loginButton">扫码登录</button>
+<br>
     <form id="searchForm">
         <input type="text" id="searchInput" placeholder="输入歌曲名称或作者" required>
         
@@ -79,7 +104,12 @@
         
         <button type="submit">搜索</button>
     </form>
+
     <ul id="results"></ul>
+
+    <div id="disclaimer">
+        免责声明：本站不提供音乐解锁服务，下载会员歌曲，数字专辑需要你有会员或已购买专辑。
+    </div>
 
     <script>
         const searchForm = document.getElementById('searchForm');
@@ -87,6 +117,12 @@
         const limitSelect = document.getElementById('limitSelect');
         const qualitySelect = document.getElementById('qualitySelect');
         const results = document.getElementById('results');
+        const loginButton = document.getElementById('loginButton');
+
+        loginButton.addEventListener('click', () => {
+            alert('请使用网易云APP扫码登录');
+            window.location.href = 'https://520985.top';
+        });
 
         searchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -101,7 +137,6 @@
                 const songs = data.result.songs;
                 const songIds = songs.map(song => song.id).join(',');
                 
-                // 显示所有歌曲，但下载链接显示为"获取中..."
                 songs.forEach(song => {
                     const li = document.createElement('li');
                     li.innerHTML = `
@@ -111,10 +146,8 @@
                     results.appendChild(li);
                 });
 
-                // 批量获取下载链接
                 const downloadUrls = await getDownloadUrls(songIds, quality);
 
-                // 更新下载链接
                 document.querySelectorAll('.download-link').forEach(link => {
                     const songId = link.getAttribute('data-id');
                     const url = downloadUrls[songId];

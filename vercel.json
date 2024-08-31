@@ -20,6 +20,10 @@
       "dest": "/web/music-xz.html"
     },
     {
+      "src": "/ssxz",
+      "dest": "/web/music-search-tool.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.js"
     }

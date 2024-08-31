@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐搜索和下载工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #searchForm {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #results {
+            list-style-type: none;
+            padding: 0;
+        }
+        #results li {
+            background-color: #f1f1f1;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .download-link {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .loading {
+            color: #888;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>音乐搜索和下载工具</h1>
+    <form id="searchForm">
+        <input type="text" id="searchInput" placeholder="输入歌曲名称或作者" required>
+        
+        <label for="limitSelect">搜索歌曲数量</label>
+        <select id="limitSelect">
+            <option value="5">5首</option>
+            <option value="10">10首</option>
+            <option value="20">20首</option>
+            <option value="30">30首</option>
+        </select>
+        
+        <label for="qualitySelect">下载音乐音质</label>
+        <select id="qualitySelect">
+            <option value="standard">标准音质</option>
+            <option value="higher">较高音质</option>
+            <option value="exhigh">极高音质</option>
+            <option value="lossless">无损音质</option>
+            <option value="hires">Hi-Res音质</option>
+            <option value="jyeffect">高清环绕声</option>
+            <option value="sky">沉浸环绕声</option>
+            <option value="jymaster">超清母带</option>
+        </select>
+        
+        <button type="submit">搜索</button>
+    </form>
+    <ul id="results"></ul>
+
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const limitSelect = document.getElementById('limitSelect');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const results = document.getElementById('results');
+
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = searchInput.value;
+            const limit = limitSelect.value;
+            const quality = qualitySelect.value;
+            const response = await fetch(`https://163.520985.top/search?keywords=${encodeURIComponent(query)}&limit=${limit}`);
+            const data = await response.json();
+
+            results.innerHTML = '';
+            if (data.result && data.result.songs) {
+                const songs = data.result.songs;
+                const songIds = songs.map(song => song.id).join(',');
+                
+                // 显示所有歌曲，但下载链接显示为"获取中..."
+                songs.forEach(song => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <a href="#" class="download-link loading" data-id="${song.id}">获取中...</a> 
+                        ${song.name} - ${song.artists[0].name}
+                    `;
+                    results.appendChild(li);
+                });
+
+                // 批量获取下载链接
+                const downloadUrls = await getDownloadUrls(songIds, quality);
+
+                // 更新下载链接
+                document.querySelectorAll('.download-link').forEach(link => {
+                    const songId = link.getAttribute('data-id');
+                    const url = downloadUrls[songId];
+                    link.href = url || '#';
+                    link.textContent = url ? '立即下载' : '暂无下载链接';
+                    link.classList.remove('loading');
+                });
+            } else {
+                results.innerHTML = '<li>未找到结果</li>';
+            }
+        });
+
+        async function getDownloadUrls(ids, quality) {
+            const response = await fetch(`https://163.520985.top/song/url/v1?id=${ids}&level=${quality}`);
+            const data = await response.json();
+            const urlMap = {};
+            data.data.forEach(item => {
+                urlMap[item.id] = item.url;
+            });
+            return urlMap;
+        }
+    </script>
+</body>
+</html>

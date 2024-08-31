@@ -3,77 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音乐搜索和下载工具</title>
+    <title>网易云音乐搜索和下载工具</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             padding: 20px;
         }
-        #warning, #disclaimer {
-            background-color: #ffe0e0;
-            border: 1px solid #ff9999;
-            padding: 10px;
-            margin-bottom: 20px;
-        }
-        h1 {
-            text-align: center;
-        }
-        .button-container {
+        #searchForm {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 10px;
             margin-bottom: 20px;
         }
-        .button-container select, .button-container button {
-            flex-grow: 1;
-            margin: 0 5px;
+        input, select, button {
             padding: 10px;
+            font-size: 16px;
         }
-        .long-button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+        button {
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
-            text-align: center;
+        }
+        #results {
+            list-style-type: none;
+            padding: 0;
+        }
+        #results li {
+            background-color: #f1f1f1;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .download-link {
+            color: #4CAF50;
             text-decoration: none;
-            font-size: 16px;
+            font-weight: bold;
+        }
+        .loading {
+            color: #888;
+            font-style: italic;
+        }
+        #warning {
+            background-color: #ffcccc;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        #loginButton {
+            background-color: #007bff;
+        }
+        #disclaimer {
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
         }
     </style>
 </head>
 <body>
     <div id="warning">
-        本站仅供交流学习<br>
-        使用前请点击"扫码登录"按钮进行登录，否则无法下载会员歌曲
+        本站仅供交流学习<br>使用前请点击"扫码登录"按钮进行登录，否则无法下载会员歌曲
     </div>
 
-    <h1>音乐搜索和下载工具</h1>
+    <h1>网易云音乐搜索和下载工具</h1>
 
-    <div class="button-container">
-        <select id="searchCount">
-            <option value="5">搜索歌曲数量 5首</option>
+    <button id="loginButton">扫码登录</button>
+
+    <form id="searchForm">
+        <input type="text" id="searchInput" placeholder="输入歌曲名称或作者" required>
+        
+        <label for="limitSelect">搜索歌曲数量</label>
+        <select id="limitSelect">
+            <option value="5">5首</option>
             <option value="10">10首</option>
             <option value="20">20首</option>
             <option value="30">30首</option>
         </select>
-        <select id="audioQuality">
-            <option value="standard">下载音乐音质 标准音质</option>
-            <option value="high">较高音质</option>
-            <option value="veryHigh">极高音质</option>
+        
+        <label for="qualitySelect">下载音乐音质</label>
+        <select id="qualitySelect">
+            <option value="standard">标准音质</option>
+            <option value="higher">较高音质</option>
+            <option value="exhigh">极高音质</option>
             <option value="lossless">无损音质</option>
-            <option value="hiRes">Hi-Res音质</option>
-            <option value="hdSurround">高清环绕声</option>
-            <option value="immersiveSurround">沉浸环绕声</option>
-            <option value="ultraHdMaster">超清母带</option>
+            <option value="hires">Hi-Res音质</option>
+            <option value="jyeffect">高清环绕声</option>
+            <option value="sky">沉浸环绕声</option>
+            <option value="jymaster">超清母带</option>
         </select>
-    </div>
+        
+        <button type="submit">搜索</button>
+    </form>
 
-    <button class="long-button" onclick="search()">搜索</button>
-    <button class="long-button" onclick="scanQRCode()">扫码登录</button>
+    <ul id="results"></ul>
 
     <div id="disclaimer">
         免责声明：本站不提供音乐解锁服务，下载会员歌曲，数字专辑需要你有会员或已购买专辑。<br>
@@ -81,18 +113,62 @@
     </div>
 
     <script>
-        function search() {
-            // 使用来访域名替换固定域名
-            var apiUrl = window.location.origin + '/search/api';
-            console.log('Searching using API:', apiUrl);
-            // 在这里实现搜索逻辑
-        }
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const limitSelect = document.getElementById('limitSelect');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const results = document.getElementById('results');
+        const loginButton = document.getElementById('loginButton');
 
-        function scanQRCode() {
-            // 使用来访域名替换固定域名
-            var loginUrl = window.location.origin + '/login/qr';
-            console.log('Opening QR code login:', loginUrl);
-            // 在这里实现扫码登录逻辑
+        loginButton.addEventListener('click', () => {
+            alert('请使用网易云APP扫码登录，显示登录完成返回此处即可！');
+            window.location.href = 'https://163.520985.top/qrlogin.html';
+        });
+
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = searchInput.value;
+            const limit = limitSelect.value;
+            const quality = qualitySelect.value;
+            const response = await fetch(`https://163.520985.top/search?keywords=${encodeURIComponent(query)}&limit=${limit}`);
+            const data = await response.json();
+
+            results.innerHTML = '';
+            if (data.result && data.result.songs) {
+                const songs = data.result.songs;
+                const songIds = songs.map(song => song.id).join(',');
+                
+                songs.forEach(song => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <a href="#" class="download-link loading" data-id="${song.id}">获取中...</a> 
+                        ${song.name} - ${song.artists[0].name}
+                    `;
+                    results.appendChild(li);
+                });
+
+                const downloadUrls = await getDownloadUrls(songIds, quality);
+
+                document.querySelectorAll('.download-link').forEach(link => {
+                    const songId = link.getAttribute('data-id');
+                    const url = downloadUrls[songId];
+                    link.href = url || '#';
+                    link.textContent = url ? '立即下载' : '暂无下载链接';
+                    link.classList.remove('loading');
+                });
+            } else {
+                results.innerHTML = '<li>未找到结果</li>';
+            }
+        });
+
+        async function getDownloadUrls(ids, quality) {
+            const response = await fetch(`https://163.520985.top/song/url/v1?id=${ids}&level=${quality}`);
+            const data = await response.json();
+            const urlMap = {};
+            data.data.forEach(item => {
+                urlMap[item.id] = item.url;
+            });
+            return urlMap;
         }
     </script>
 </body>

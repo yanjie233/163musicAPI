@@ -38,7 +38,7 @@ export default {
       songUrls.value = [];
 
       try {
-        const playlistUrl = `https://163.520985.top/playlist/detail?id=${playlistId.value}`;
+        const playlistUrl = `https://music.yanjie233.top/playlist/detail?id=${playlistId.value}`;
         const { data } = await axios.get(playlistUrl);
 
         if (data.code === 200 && data.playlist && data.playlist.tracks) {
@@ -47,7 +47,7 @@ export default {
 
           for (const track of tracks) {
             const songId = track.id;
-            const songUrl = `https://163.520985.top/song/url?id=${songId}`;
+            const songUrl = `https://music.yanjie233.top/song/url?id=${songId}`;
             
             try {
               const { data: songData } = await axios.get(songUrl);

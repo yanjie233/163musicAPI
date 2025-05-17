@@ -200,8 +200,8 @@
     <h1>网易云音乐搜索和下载工具</h1>
 
     <div class="button-container">
-        <button id="loginButton">扫码登录</button>
-        <button id="internalLoginButton">免登录(内部)</button>
+        <button id="loginButton" type="button">扫码登录</button>
+        <button id="internalLoginButton" type="button">免登录(内部)</button>
     </div>
 
     <form id="searchForm">
@@ -301,6 +301,29 @@
             });
             return urlMap;
         }
+
+        // 修正扫码登录和内部验证按钮逻辑
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginButton = document.getElementById('loginButton');
+            const internalLoginButton = document.getElementById('internalLoginButton');
+            const adminTimer = document.getElementById('admin-timer');
+
+            if (loginButton) {
+                loginButton.addEventListener('click', () => {
+                    alert('请使用网易云APP扫码登录，显示登录完成返回此处即可！');
+                    window.top.location.href = 'https://music.yanjie233.top/qrlogin.html';
+                });
+            }
+
+            if (internalLoginButton) {
+                internalLoginButton.addEventListener('click', () => {
+                    // 触发 auth.js 的内部验证逻辑
+                    if (typeof AuthManager !== 'undefined' && AuthManager.handleInternalLogin) {
+                        AuthManager.handleInternalLogin();
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

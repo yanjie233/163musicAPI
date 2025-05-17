@@ -16,12 +16,16 @@
   ],
   "routes": [
     {
-      "src": "/musicxz",
+      "src": "/gdxz",
       "dest": "/web/music-xz.html"
     },
     {
       "src": "/ssxz",
       "dest": "/web/music-search-tool.html"
+    },
+    {
+      "src": "/auth",
+      "dest": "/web/auth.js"
     },
     {
       "src": "/(.*)",

@@ -5,76 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>网易云音乐搜索和下载工具</title>
     <style>
+        :root {
+            --primary-color: #3f51b5;       /* 靛蓝色 */
+            --primary-hover: #5c6bc0;       /* 亮靛蓝色 */
+            --secondary-color: #303f9f;     /* 深靛蓝色 */
+            --accent-color: #ff6b6b;        /* 珊瑚红 */
+            --bg-color: #f8f9fa;            /* 浅灰色背景 */
+            --card-color: #ffffff;          /* 卡片白色 */
+            --text-color: #333333;          /* 主文本色 */
+            --secondary-text: #6c757d;      /* 次要文本 */
+            --border-color: #e0e0e0;        /* 边框色 */
+            --warning-color: #ffebee;       /* 警告背景 */
+            --warning-border: #f44336;      /* 警告边框 */
+            --warning-text: #c62828;        /* 警告文字 */
+            --shadow: 0 2px 10px rgba(0,0,0,0.1); /* 阴影 */
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
+            font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
         }
+
         #searchForm {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 24px;
+            background-color: var(--card-color);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
         }
+
         input, select, button {
-            padding: 10px;
+            padding: 14px;
             font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 5px rgba(63, 81, 181, 0.3);
+        }
+
         button {
-            background-color: #4CAF50;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
         #results {
             list-style-type: none;
             padding: 0;
         }
+
         #results li {
-            background-color: #f1f1f1;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
+            background-color: var(--card-color);
+            margin-bottom: 12px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
         }
+
+        #results li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
         label {
-            font-weight: bold;
-            margin-top: 10px;
+            font-weight: 600;
+            margin-top: 12px;
+            display: block;
+            margin-bottom: 6px;
+            color: var(--secondary-text);
         }
+
         .download-link {
-            color: #4CAF50;
+            color: var(--primary-color);
             text-decoration: none;
             font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background-color: rgba(63, 81, 181, 0.1);
+            margin-right: 16px;
+            transition: all 0.2s ease;
         }
+
+        .download-link:hover {
+            background-color: rgba(63, 81, 181, 0.2);
+            text-decoration: underline;
+        }
+
         .loading {
-            color: #888;
+            color: var(--secondary-text);
             font-style: italic;
         }
+
         #warning {
-            background-color: #ffcccc;
-            border: 1px solid #ff0000;
-            color: #ff0000;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+            background-color: var(--warning-color);
+            border-left: 4px solid var(--warning-border);
+            color: var(--warning-text);
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 6px;
+            font-weight: 500;
         }
+
         #loginButton {
-            background-color: #007bff;
+            background-color: var(--secondary-color);
         }
-        #adminButton {
-            background-color: #ff9800;
+
+        #loginButton:hover {
+            background-color: #2a4685;
         }
+
+        #internalLoginButton {
+            background-color: var(--accent-color);
+        }
+
+        #internalLoginButton:hover {
+            background-color: #ff8585;
+        }
+
         #disclaimer {
             font-size: 12px;
-            color: #666;
-            margin-top: 20px;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
+            color: var(--secondary-text);
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
         }
+
+        #admin-timer {
+            font-size: 14px;
+            color: var(--accent-color);
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+            background-color: rgba(255, 107, 107, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
         .button-container {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .song-info {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .song-artist {
+            color: var(--secondary-text);
+            font-size: 14px;
         }
     </style>
 </head>
@@ -87,7 +201,7 @@
 
     <div class="button-container">
         <button id="loginButton">扫码登录</button>
-        <button id="adminButton">管理员免验证通道</button>
+        <button id="internalLoginButton">免登录(内部)</button>
     </div>
 
     <form id="searchForm">
@@ -122,69 +236,18 @@
         免责声明：本站不提供音乐解锁服务，下载会员歌曲，数字专辑需要你有会员或已购买专辑。<br>
         无法获取链接的原因有：你没登录、账号没会员、歌曲是数字专辑、你选的音质这个歌曲没有
     </div>
+    
+    <div id="admin-timer"></div>
 
+    <!-- 引入独立的认证脚本 -->
+    <script src="auth.js"></script>
+    
     <script>
         const searchForm = document.getElementById('searchForm');
         const searchInput = document.getElementById('searchInput');
         const limitSelect = document.getElementById('limitSelect');
         const qualitySelect = document.getElementById('qualitySelect');
         const results = document.getElementById('results');
-        const loginButton = document.getElementById('loginButton');
-        const adminButton = document.getElementById('adminButton');
-
-        loginButton.addEventListener('click', () => {
-            alert('请使用网易云APP扫码登录，显示登录完成返回此处即可！');
-            window.location.href = 'https://music.yanjie233.top/qrlogin.html';
-        });
-
-        adminButton.addEventListener('click', () => {
-            const password = prompt('请输入管理员密码:');
-            if (password === '114514') {
-                // 设置预定义的cookie
-                const cookies = [
-                    'NMTID=00OcvXytT-KchKhzE_5gJsDwmxYRlcAAAGV_G_UjA',
-                    '*ntes*nnid=537ef000697ac9ce31924ef9fe917f5a,1743696943703',
-                    '*ntes*nuid=537ef000697ac9ce31924ef9fe917f5a',
-                    'WEVNSM=1.0.0',
-                    'WNMCID=hzdqoe.1743696944411.01.0',
-                    'WM_TID=NoBpXiIy63JAEUEEVEeTOURrMO0cs3KR',
-                    '**snaker**id=nhNLUubGFRGP4xhL',
-                    '__remember_me=true',
-                    '__csrf=a7e1ed144dc2ca6ec2d68fb6ebdf65bd',
-                    '*iuqxldmzr*=32',
-                    'JSESSIONID-WYYY=TRBKXGTn1NnNAOthzcn1zFyJlBEircQ8%5C8a4XjC4NJTHH8PwMuzjtyDpMwjS4jhMwUctZJIMSGkZ3OR%5CIlAWXpy9kX%2Bzd%5C5TS%2BQEM7QdYflzt4VOstSeq1rD335FqWW0ilul3Yyixfk%2BmOmsFb843bV%5CoSECgnydUsiu4VMWrX%5C%2Fv9JH%3A1747471141031',
-                    'gdxidpyhxdE=5QOY2MaiuBsIRKXYT1Iitl5%2FR%2F4eevlQek6NIq2b1XNE%2BDRxU8NLa0cj%2Fg42M32S1UQau0sHbpU6HHrsHO%5C%2B23%5CRVTO58KR5wmM7%5C8Z05hpRzyj%2FR2z4z6EsYqPL6NaDKlarLAEn1Mpi3n3XNwWx%2FvukeWL7cbrQMamBwjAyf9qn00xd%3A1747470244168',
-                    'WM_NI=7ptwdX3o3AzXYveVsE0czEf2mZYLbeZtFXB88GT4u9ZmoT5Tuv8ECgolXgRK185bjjZP8K1KPrLKy6ZiuVw4pqbeIKmVdmxlooLN%2FEzWZoKe7WK8%2FyzcKmeKI7t%2F7%2ByyY0M%3D',
-                    'WM_NIKE=9ca17ae2e6ffcda170e2e6eeaad14be98cfca4c2408c9e8aa7c84e878b8facd26fa2bbfeafe7688fb5ad8bb62af0fea7c3b92af5b0bc98e754f1b1fda2f9549baaabb7f24ff4bdb6a6e53aaf8697ade16f9aac8ab9c134fc999cd5f8339ab3a1b5b860b7aaf8a6c26dadb49888d141f3e8fb83e9629a90f8acb44194ae84acfc3e9ab7bbb7f640b4afae86cc41af8aac8efb68adb184afae4fba899690ca6ff58985d9ae73babd858ee8418be9bcd0b621bba797d1d037e2a3',
-                    'MUSIC_U=0071950DDE590BDA6751EE7835C4ABEF0023F8B4FC4D376ECA06AC9A613B0D9A9D95B75408DD7C030351301F473141E49283F5B369FCBCCF3739DE2CE458F046E83B9484025BE2BD89083AFF4FB8617BA2076FD4B143B78DC0B6E84D2F7FBD3C89AE5DD662CC13C5493750C415F8730ADC9A9A751DBF4C3F004459F40258B6596E1E2E043D97E81792E2EE59F806A640313925867BAFDB339191555DEBB08B9DCF9D99D1374DEF953FE15816DFE2909B9D38C85FB06C459E15D1FB65CB9B83BAAEC4021BBEDF7B2D97DB06F145EA24C2498487AF31A8FE9418DB8B128DAD04536FB6C86E72E72044DEA307E835739F9BE4DB43B8382C0D9448A5FDB7B8B8BF4479F15BBA4ED624E847E95FA067BA88E77D5D3CAE30CA91791ABF1E87FE8313317D513724BDCC5FC22F80AD8B4892F3089FED6E0E651F92DEF0DBE8C82E3ED5F38E',
-                    '__csrf=273e8afbd6cbb3891daf449693e58154'
-                ];
-
-                // 设置cookies
-                cookies.forEach(cookieStr => {
-                    try {
-                        // 提取cookie名称和值
-                        const eqPos = cookieStr.indexOf('=');
-                        if (eqPos > 0) {
-                            const name = cookieStr.substring(0, eqPos).trim();
-                            const value = cookieStr.substring(eqPos + 1).trim();
-                            
-                            // 设置cookie，有效期设置为1天
-                            document.cookie = `${name}=${value}; path=/; max-age=86400`;
-                        } else {
-                            console.error('Invalid cookie format:', cookieStr);
-                        }
-                    } catch (e) {
-                        console.error('Error setting cookie:', e);
-                    }
-                });
-                
-                alert('管理员验证成功！系统已为您自动登录。');
-                window.location.reload();
-            } else {
-                alert('密码错误！');
-            }
-        });
 
         searchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -201,9 +264,13 @@
                 
                 songs.forEach(song => {
                     const li = document.createElement('li');
+                    const artists = song.artists.map(artist => artist.name).join(', ');
                     li.innerHTML = `
                         <a href="#" class="download-link loading" data-id="${song.id}">获取中...</a> 
-                        ${song.name} - ${song.artists[0].name}
+                        <div class="song-info">
+                            <div><strong>${song.name}</strong></div>
+                            <div class="song-artist">${artists}</div>
+                        </div>
                     `;
                     results.appendChild(li);
                 });
@@ -216,6 +283,9 @@
                     link.href = url || '#';
                     link.textContent = url ? '立即下载' : '暂无下载链接';
                     link.classList.remove('loading');
+                    if (url) {
+                        link.setAttribute('target', '_blank'); // 在新窗口打开链接
+                    }
                 });
             } else {
                 results.innerHTML = '<li>未找到结果</li>';

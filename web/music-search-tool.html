@@ -287,7 +287,7 @@
                     const songId = link.getAttribute('data-id');
                     const url = downloadUrls[songId];
                     link.href = url || '#';
-                    link.textContent = url ? '立即下载' : '暂无下载链接';
+                    link.textContent = url ? '立即下载' : '获取失败';
                     link.classList.remove('loading');
                     if (url) {
                         link.setAttribute('target', '_blank'); // 在新窗口打开链接

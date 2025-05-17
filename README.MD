@@ -1,8 +1,15 @@
-# 网易云音乐 API （带UI版）
+# 网易云音乐 API 在线版
 
+### DEMO
 
-网易云音乐 Node.js API service （续写带UI版）
+单曲搜索下载 V2Pro版
+![image.png](https://img.7so.top/api/cfile/AgACAgUAAyEGAASIhYnFAAMyaChf8qrTlZKpqMwgUWW8Xyw-qPAAAtfDMRs12EFVpt441iUaJuIBAAMCAAN3AAM2BA)
 
+## 立即使用
+
+[歌单下载(Beta)](https://music.yanjie233.top/gdxz)
+
+[单曲搜索下载](https://music.yanjie233.top/ssxz)
 
 ## 项目说明
 本项目基于项目 Node.js 网易云API 项目进行的续写，主要将原本的API返回的json信息编写了UI（正在慢慢写），原项目已删库，如需要寻找原项目可以点击下方的文档地址。
@@ -31,7 +38,7 @@ v4.0.8 加入了 Vercel 配置文件,可以直接在 Vercel 下部署了,不需�
 
 ## 使用文档
 
-[文档地址](https://docs-neteasecloudmusicapi.vercel.app)
+[文档地址](https://music.yanjie233.top/docs/#/?id=neteasecloudmusicapi)
 
 ## 功能特性
 

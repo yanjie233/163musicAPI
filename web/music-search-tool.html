@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网易云音乐搜索和下载工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #searchForm {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #results {
+            list-style-type: none;
+            padding: 0;
+        }
+        #results li {
+            background-color: #f1f1f1;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .download-link {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .loading {
+            color: #888;
+            font-style: italic;
+        }
+        #warning {
+            background-color: #ffcccc;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        #loginButton {
+            background-color: #007bff;
+        }
+        #adminButton {
+            background-color: #ff9800;
+        }
+        #disclaimer {
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="warning">
+        本站仅供交流学习<br>使用前请点击"扫码登录"按钮进行登录，否则无法下载会员歌曲
+    </div>
+
+    <h1>网易云音乐搜索和下载工具</h1>
+
+    <div class="button-container">
+        <button id="loginButton">扫码登录</button>
+        <button id="adminButton">管理员免验证通道</button>
+    </div>
+
+    <form id="searchForm">
+        <input type="text" id="searchInput" placeholder="输入歌曲名称或作者" required>
+        
+        <label for="limitSelect">搜索歌曲数量</label>
+        <select id="limitSelect">
+            <option value="5">5首</option>
+            <option value="10">10首</option>
+            <option value="20">20首</option>
+            <option value="30">30首</option>
+        </select>
+        
+        <label for="qualitySelect">下载音乐音质</label>
+        <select id="qualitySelect">
+            <option value="standard">标准音质</option>
+            <option value="higher">较高音质</option>
+            <option value="exhigh">极高音质</option>
+            <option value="lossless">无损音质</option>
+            <option value="hires">Hi-Res音质</option>
+            <option value="jyeffect">高清环绕声</option>
+            <option value="sky">沉浸环绕声</option>
+            <option value="jymaster">超清母带</option>
+        </select>
+        
+        <button type="submit">搜索</button>
+    </form>
+
+    <ul id="results"></ul>
+
+    <div id="disclaimer">
+        免责声明：本站不提供音乐解锁服务，下载会员歌曲，数字专辑需要你有会员或已购买专辑。<br>
+        无法获取链接的原因有：你没登录、账号没会员、歌曲是数字专辑、你选的音质这个歌曲没有
+    </div>
+
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const limitSelect = document.getElementById('limitSelect');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const results = document.getElementById('results');
+        const loginButton = document.getElementById('loginButton');
+        const adminButton = document.getElementById('adminButton');
+
+        loginButton.addEventListener('click', () => {
+            alert('请使用网易云APP扫码登录，显示登录完成返回此处即可！');
+            window.location.href = 'https://music.yanjie233.top/qrlogin.html';
+        });
+
+        adminButton.addEventListener('click', () => {
+            const password = prompt('请输入管理员密码:');
+            if (password === '114514') {
+                // 设置预定义的cookie
+                const cookies = [
+                    'NMTID=00OcvXytT-KchKhzE_5gJsDwmxYRlcAAAGV_G_UjA',
+                    '*ntes*nnid=537ef000697ac9ce31924ef9fe917f5a,1743696943703',
+                    '*ntes*nuid=537ef000697ac9ce31924ef9fe917f5a',
+                    'WEVNSM=1.0.0',
+                    'WNMCID=hzdqoe.1743696944411.01.0',
+                    'WM_TID=NoBpXiIy63JAEUEEVEeTOURrMO0cs3KR',
+                    '**snaker**id=nhNLUubGFRGP4xhL',
+                    '__remember_me=true',
+                    '__csrf=a7e1ed144dc2ca6ec2d68fb6ebdf65bd',
+                    '*iuqxldmzr*=32',
+                    'JSESSIONID-WYYY=TRBKXGTn1NnNAOthzcn1zFyJlBEircQ8%5C8a4XjC4NJTHH8PwMuzjtyDpMwjS4jhMwUctZJIMSGkZ3OR%5CIlAWXpy9kX%2Bzd%5C5TS%2BQEM7QdYflzt4VOstSeq1rD335FqWW0ilul3Yyixfk%2BmOmsFb843bV%5CoSECgnydUsiu4VMWrX%5C%2Fv9JH%3A1747471141031',
+                    'gdxidpyhxdE=5QOY2MaiuBsIRKXYT1Iitl5%2FR%2F4eevlQek6NIq2b1XNE%2BDRxU8NLa0cj%2Fg42M32S1UQau0sHbpU6HHrsHO%5C%2B23%5CRVTO58KR5wmM7%5C8Z05hpRzyj%2FR2z4z6EsYqPL6NaDKlarLAEn1Mpi3n3XNwWx%2FvukeWL7cbrQMamBwjAyf9qn00xd%3A1747470244168',
+                    'WM_NI=7ptwdX3o3AzXYveVsE0czEf2mZYLbeZtFXB88GT4u9ZmoT5Tuv8ECgolXgRK185bjjZP8K1KPrLKy6ZiuVw4pqbeIKmVdmxlooLN%2FEzWZoKe7WK8%2FyzcKmeKI7t%2F7%2ByyY0M%3D',
+                    'WM_NIKE=9ca17ae2e6ffcda170e2e6eeaad14be98cfca4c2408c9e8aa7c84e878b8facd26fa2bbfeafe7688fb5ad8bb62af0fea7c3b92af5b0bc98e754f1b1fda2f9549baaabb7f24ff4bdb6a6e53aaf8697ade16f9aac8ab9c134fc999cd5f8339ab3a1b5b860b7aaf8a6c26dadb49888d141f3e8fb83e9629a90f8acb44194ae84acfc3e9ab7bbb7f640b4afae86cc41af8aac8efb68adb184afae4fba899690ca6ff58985d9ae73babd858ee8418be9bcd0b621bba797d1d037e2a3',
+                    'MUSIC_U=0071950DDE590BDA6751EE7835C4ABEF0023F8B4FC4D376ECA06AC9A613B0D9A9D95B75408DD7C030351301F473141E49283F5B369FCBCCF3739DE2CE458F046E83B9484025BE2BD89083AFF4FB8617BA2076FD4B143B78DC0B6E84D2F7FBD3C89AE5DD662CC13C5493750C415F8730ADC9A9A751DBF4C3F004459F40258B6596E1E2E043D97E81792E2EE59F806A640313925867BAFDB339191555DEBB08B9DCF9D99D1374DEF953FE15816DFE2909B9D38C85FB06C459E15D1FB65CB9B83BAAEC4021BBEDF7B2D97DB06F145EA24C2498487AF31A8FE9418DB8B128DAD04536FB6C86E72E72044DEA307E835739F9BE4DB43B8382C0D9448A5FDB7B8B8BF4479F15BBA4ED624E847E95FA067BA88E77D5D3CAE30CA91791ABF1E87FE8313317D513724BDCC5FC22F80AD8B4892F3089FED6E0E651F92DEF0DBE8C82E3ED5F38E',
+                    '__csrf=273e8afbd6cbb3891daf449693e58154'
+                ];
+
+                // 设置cookies
+                cookies.forEach(cookieStr => {
+                    try {
+                        // 提取cookie名称和值
+                        const eqPos = cookieStr.indexOf('=');
+                        if (eqPos > 0) {
+                            const name = cookieStr.substring(0, eqPos).trim();
+                            const value = cookieStr.substring(eqPos + 1).trim();
+                            
+                            // 设置cookie，有效期设置为1天
+                            document.cookie = `${name}=${value}; path=/; max-age=86400`;
+                        } else {
+                            console.error('Invalid cookie format:', cookieStr);
+                        }
+                    } catch (e) {
+                        console.error('Error setting cookie:', e);
+                    }
+                });
+                
+                alert('管理员验证成功！系统已为您自动登录。');
+                window.location.reload();
+            } else {
+                alert('密码错误！');
+            }
+        });
+
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = searchInput.value;
+            const limit = limitSelect.value;
+            const quality = qualitySelect.value;
+            const response = await fetch(`https://music.yanjie233.top/search?keywords=${encodeURIComponent(query)}&limit=${limit}`);
+            const data = await response.json();
+
+            results.innerHTML = '';
+            if (data.result && data.result.songs) {
+                const songs = data.result.songs;
+                const songIds = songs.map(song => song.id).join(',');
+                
+                songs.forEach(song => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <a href="#" class="download-link loading" data-id="${song.id}">获取中...</a> 
+                        ${song.name} - ${song.artists[0].name}
+                    `;
+                    results.appendChild(li);
+                });
+
+                const downloadUrls = await getDownloadUrls(songIds, quality);
+
+                document.querySelectorAll('.download-link').forEach(link => {
+                    const songId = link.getAttribute('data-id');
+                    const url = downloadUrls[songId];
+                    link.href = url || '#';
+                    link.textContent = url ? '立即下载' : '暂无下载链接';
+                    link.classList.remove('loading');
+                });
+            } else {
+                results.innerHTML = '<li>未找到结果</li>';
+            }
+        });
+
+        async function getDownloadUrls(ids, quality) {
+            const response = await fetch(`https://music.yanjie233.top/song/url/v1?id=${ids}&level=${quality}`);
+            const data = await response.json();
+            const urlMap = {};
+            data.data.forEach(item => {
+                urlMap[item.id] = item.url;
+            });
+            return urlMap;
+        }
+    </script>
+</body>
+</html>

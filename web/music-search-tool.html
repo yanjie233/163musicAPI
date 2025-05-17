@@ -131,6 +131,7 @@
             margin-bottom: 24px;
             border-radius: 6px;
             font-weight: 500;
+            position: relative;
         }
 
         #loginButton {
@@ -202,7 +203,8 @@
 </head>
 <body>
     <div id="warning">
-        本站仅供交流学习<br>使用前请点击"扫码登录"按钮进行登录，否则无法下载会员歌曲
+        本站仅供交流学习<br>使用前请先进行登录，否则无法下载会员歌曲
+        <button id="close-warning-btn" style="position:absolute;top:8px;right:12px;background:transparent;border:none;font-size:18px;cursor:pointer;color:#c62828;">×</button>
     </div>
 
     <h1>网易云音乐搜索和下载工具</h1>
@@ -211,6 +213,7 @@
         <button id="loginButton" type="button">扫码登录</button>
         <button id="customCookieLoginButton" type="button">自定义Cookie登录</button>
         <button id="clearCookieButton" type="button">解除登录状态</button>
+        <button id="cookieHelpButton" type="button">登录教程</button>
         <button id="internalLoginButton" type="button">管理登录</button>
     </div>
 
@@ -393,9 +396,20 @@
             }
         }
 
+        // 警告框关闭与自动隐藏逻辑
+        function checkAndHideWarning() {
+            const warningDiv = document.getElementById('warning');
+            const cookie = localStorage.getItem('custom_music_cookie');
+            const expire = localStorage.getItem('custom_music_cookie_expire');
+            if (cookie && expire && parseInt(expire) > Date.now()) {
+                warningDiv.style.display = 'none';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const customCookieLoginButton = document.getElementById('customCookieLoginButton');
             const clearCookieButton = document.getElementById('clearCookieButton');
+            const cookieHelpButton = document.getElementById('cookieHelpButton');
 
             if (customCookieLoginButton) {
                 customCookieLoginButton.addEventListener('click', () => {
@@ -416,6 +430,21 @@
                 });
             }
 
+            if (cookieHelpButton) {
+                cookieHelpButton.addEventListener('click', () => {
+                    window.open('https://jsd-pro.yanjie233.top/gh/yanjie233/picx-images-hosting@master/Cookie登录方式教程.39leotoite.webp', '_blank');
+                });
+            }
+
+            // 关闭警告按钮
+            const closeBtn = document.getElementById('close-warning-btn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    document.getElementById('warning').style.display = 'none';
+                });
+            }
+
+            checkAndHideWarning();
             updateCookieStatus();
         });
     </script>

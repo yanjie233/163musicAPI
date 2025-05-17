@@ -352,16 +352,27 @@
             localStorage.setItem(COOKIE_KEY, cookie);
             const expire = Date.now() + days * 24 * 60 * 60 * 1000;
             localStorage.setItem(COOKIE_EXPIRE_KEY, expire);
-            // 设置到document.cookie（仅本地生效，实际请求需后端支持）
-            document.cookie = cookie + `;path=/;max-age=${days*24*60*60}`;
+            // 拆分每一项cookie并分别设置
+            cookie.split(';').forEach(function(pair) {
+                const eqPos = pair.indexOf('=');
+                if (eqPos > 0) {
+                    const name = pair.substring(0, eqPos).trim();
+                    const value = pair.substring(eqPos + 1).trim();
+                    document.cookie = `${name}=${value};path=/;max-age=${days*24*60*60}`;
+                }
+            });
         }
 
         function clearCustomCookie() {
             localStorage.removeItem(COOKIE_KEY);
             localStorage.removeItem(COOKIE_EXPIRE_KEY);
-            // 清空document.cookie（仅本地，实际需后端支持完整清除）
+            // 清空所有自定义设置的cookie（仅本地，实际需后端支持完整清除）
             document.cookie.split(';').forEach(function(c) {
-                document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+                const eqPos = c.indexOf('=');
+                if (eqPos > 0) {
+                    const name = c.substring(0, eqPos).trim();
+                    document.cookie = name + '=;expires=' + new Date(0).toUTCString() + ';path=/';
+                }
             });
         }
 
@@ -410,3 +421,4 @@
     </script>
 </body>
 </html>
+``` 

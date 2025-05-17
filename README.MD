@@ -9,7 +9,7 @@
 
 [歌单下载(Beta)](https://music.yanjie233.top/gdxz)
 
-[单曲搜索下载](https://music.yanjie233.top/ssxz)
+[单曲搜索下载](https://music.yanjie233.top/music-downloader)
 
 ## 项目说明
 本项目基于项目 Node.js 网易云API 项目进行的续写，主要将原本的API返回的json信息编写了UI（正在慢慢写），原项目已删库，如需要寻找原项目可以点击下方的文档地址。

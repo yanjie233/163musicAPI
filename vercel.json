@@ -28,6 +28,10 @@
       "dest": "/web/auth.js"
     },
     {
+      "src": "/music-downloader",
+      "dest": "/web/music-search-tool.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.js"
     }

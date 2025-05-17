@@ -191,6 +191,13 @@
             color: var(--secondary-text);
             font-size: 14px;
         }
+
+        .cookie-status {
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -202,6 +209,8 @@
 
     <div class="button-container">
         <button id="loginButton" type="button">扫码登录</button>
+        <button id="customCookieLoginButton" type="button">自定义Cookie登录</button>
+        <button id="clearCookieButton" type="button">解除登录状态</button>
         <button id="internalLoginButton" type="button">管理登录</button>
     </div>
 
@@ -239,6 +248,7 @@
     </div>
     
     <div id="admin-timer"></div>
+    <div id="cookie-status" class="cookie-status"></div>
 
     <!-- 页脚 -->
     <footer style="text-align:center;color:#aaa;font-size:13px;margin-top:40px;">
@@ -330,6 +340,72 @@
                     }
                 });
             }
+        });
+
+        // 自定义Cookie登录相关
+        const COOKIE_KEY = 'custom_music_cookie';
+        const COOKIE_EXPIRE_KEY = 'custom_music_cookie_expire';
+        const COOKIE_DAYS = 14;
+        const cookieStatusDiv = document.getElementById('cookie-status');
+
+        function setCustomCookie(cookie, days) {
+            localStorage.setItem(COOKIE_KEY, cookie);
+            const expire = Date.now() + days * 24 * 60 * 60 * 1000;
+            localStorage.setItem(COOKIE_EXPIRE_KEY, expire);
+            // 设置到document.cookie（仅本地生效，实际请求需后端支持）
+            document.cookie = cookie + `;path=/;max-age=${days*24*60*60}`;
+        }
+
+        function clearCustomCookie() {
+            localStorage.removeItem(COOKIE_KEY);
+            localStorage.removeItem(COOKIE_EXPIRE_KEY);
+            // 清空document.cookie（仅本地，实际需后端支持完整清除）
+            document.cookie.split(';').forEach(function(c) {
+                document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+            });
+        }
+
+        function getCustomCookieExpire() {
+            const expire = localStorage.getItem(COOKIE_EXPIRE_KEY);
+            return expire ? parseInt(expire) : null;
+        }
+
+        function updateCookieStatus() {
+            const expire = getCustomCookieExpire();
+            if (expire && expire > Date.now()) {
+                const leftMs = expire - Date.now();
+                const leftDays = Math.floor(leftMs / (24*60*60*1000));
+                const leftHours = Math.floor((leftMs % (24*60*60*1000)) / (60*60*1000));
+                cookieStatusDiv.textContent = `Cookie登录有效期剩余: ${leftDays}天${leftHours}小时`;
+            } else {
+                cookieStatusDiv.textContent = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const customCookieLoginButton = document.getElementById('customCookieLoginButton');
+            const clearCookieButton = document.getElementById('clearCookieButton');
+
+            if (customCookieLoginButton) {
+                customCookieLoginButton.addEventListener('click', () => {
+                    const cookie = prompt('请输入完整的网易云登录Cookie（如MUSIC_U=xxx; ...）');
+                    if (cookie && cookie.trim()) {
+                        setCustomCookie(cookie.trim(), COOKIE_DAYS);
+                        alert('Cookie已保存，有效期14天。');
+                        updateCookieStatus();
+                    }
+                });
+            }
+
+            if (clearCookieButton) {
+                clearCookieButton.addEventListener('click', () => {
+                    clearCustomCookie();
+                    alert('已解除登录状态。');
+                    updateCookieStatus();
+                });
+            }
+
+            updateCookieStatus();
         });
     </script>
 </body>

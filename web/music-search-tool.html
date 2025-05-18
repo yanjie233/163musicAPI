@@ -337,41 +337,12 @@
 
             if (internalLoginButton) {
                 internalLoginButton.addEventListener('click', () => {
-                    // 触发 auth.js 的内部验证逻辑
-                    if (typeof AuthManager !== 'undefined' && AuthManager.handleInternalLogin) {
-                        try {
-                            AuthManager.handleInternalLogin(
-                                function onSuccess() {
-                                    // 登录成功HTTP请求API，成功后刷新
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('GET', 'http://yj233api.ccccocccc.cc/163api.php', true);
-                                    xhr.onreadystatechange = function() {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            location.reload();
-                                        }
-                                    };
-                                    xhr.send();
-                                },
-                                function onError(err) {
-                                    // 验证失败不做任何API请求
-                                }
-                            );
-                        } catch (e) {
-                            if (!window._adminLoginReported) {
-                                window._adminLoginReported = true;
-                                document.addEventListener('admin-login-success', function() {
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('GET', 'http://yj233api.ccccocccc.cc/163api.php', true);
-                                    xhr.onreadystatechange = function() {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            location.reload();
-                                        }
-                                    };
-                                    xhr.send();
-                                });
+                    if (typeof adminLoginAndLog === 'function') {
+                        adminLoginAndLog(
+                            function onSuccess() {
+                                location.reload();
                             }
-                            AuthManager.handleInternalLogin();
-                        }
+                        );
                     }
                 });
             }

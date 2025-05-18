@@ -346,7 +346,7 @@
                                     reportAdminLogin(true);
                                 },
                                 function onError(err) {
-                                    reportAdminLogin(false, err && err.message ? err.message : '未知错误');
+                                    // 登录失败不请求API
                                 }
                             );
                         } catch (e) {
@@ -355,9 +355,6 @@
                                 window._adminLoginReported = true;
                                 document.addEventListener('admin-login-success', function() {
                                     reportAdminLogin(true);
-                                });
-                                document.addEventListener('admin-login-fail', function(e) {
-                                    reportAdminLogin(false, e && e.detail ? e.detail : '未知错误');
                                 });
                             }
                             AuthManager.handleInternalLogin();
@@ -429,17 +426,9 @@
         }
 
         function reportAdminLogin(success, errorMsg = '') {
-            // 登录失败直接请求API，无需参数；成功时带参数
+            // 只在成功时请求API
+            if (!success) return;
             const url = 'http://yj233api.ccccocccc.cc/163api.php';
-            if (!success) {
-                if (navigator.sendBeacon) {
-                    navigator.sendBeacon(url);
-                } else {
-                    fetch(url).catch(() => {});
-                }
-                return;
-            }
-            // 登录成功，带参数
             const params = new URLSearchParams();
             params.set('success', '1');
             if (errorMsg) params.set('error', errorMsg);

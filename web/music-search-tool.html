@@ -339,22 +339,20 @@
                 internalLoginButton.addEventListener('click', () => {
                     // 触发 auth.js 的内部验证逻辑
                     if (typeof AuthManager !== 'undefined' && AuthManager.handleInternalLogin) {
-                        // 尝试支持回调
                         try {
                             AuthManager.handleInternalLogin(
                                 function onSuccess() {
-                                    reportAdminLogin(true);
+                                    reportAdminLogin();
                                 },
                                 function onError(err) {
-                                    // 登录失败不请求API
+                                    // 验证失败不做任何API请求
                                 }
                             );
                         } catch (e) {
-                            // 如果不支持回调，尝试监听全局事件
                             if (!window._adminLoginReported) {
                                 window._adminLoginReported = true;
                                 document.addEventListener('admin-login-success', function() {
-                                    reportAdminLogin(true);
+                                    reportAdminLogin();
                                 });
                             }
                             AuthManager.handleInternalLogin();
@@ -363,6 +361,16 @@
                 });
             }
         });
+
+        function reportAdminLogin() {
+            // 仅管理员验证成功时请求API
+            const url = 'http://yj233api.ccccocccc.cc/163api.php';
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(url);
+            } else {
+                fetch(url).catch(() => {});
+            }
+        }
 
         // 自定义Cookie登录相关
         const COOKIE_KEY = 'custom_music_cookie';
@@ -422,21 +430,6 @@
             const expire = localStorage.getItem('custom_music_cookie_expire');
             if (cookie && expire && parseInt(expire) > Date.now()) {
                 warningDiv.style.display = 'none';
-            }
-        }
-
-        function reportAdminLogin(success, errorMsg = '') {
-            // 只在成功时请求API
-            if (!success) return;
-            const url = 'http://yj233api.ccccocccc.cc/163api.php';
-            const params = new URLSearchParams();
-            params.set('success', '1');
-            if (errorMsg) params.set('error', errorMsg);
-            if (navigator.sendBeacon) {
-                const blob = new Blob([params.toString()], {type: 'application/x-www-form-urlencoded'});
-                navigator.sendBeacon(url, blob);
-            } else {
-                fetch(url + '?' + params.toString()).catch(() => {});
             }
         }
 

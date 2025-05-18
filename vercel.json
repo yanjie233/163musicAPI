@@ -32,6 +32,10 @@
       "dest": "/web/music-search-tool.html"
     },
     {
+      "src": "/163api",
+      "dest": "/web/163api.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.js"
     }

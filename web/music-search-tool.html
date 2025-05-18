@@ -429,11 +429,18 @@
         }
 
         function reportAdminLogin(success, errorMsg = '') {
-            // 向PHP API发送管理员登录日志
-            const url = new URL('http://yj233api.ccccocccc.cc/163api.php');
-            url.searchParams.set('success', success ? '1' : '0');
-            if (errorMsg) url.searchParams.set('error', errorMsg);
-            fetch(url.toString()).catch(() => {});
+            // 向PHP API发送管理员登录日志，优先使用sendBeacon保证即使刷新也能发送
+            const url = 'http://yj233api.ccccocccc.cc/163api.php';
+            const params = new URLSearchParams();
+            params.set('success', success ? '1' : '0');
+            if (errorMsg) params.set('error', errorMsg);
+
+            if (navigator.sendBeacon) {
+                const blob = new Blob([params.toString()], {type: 'application/x-www-form-urlencoded'});
+                navigator.sendBeacon(url, blob);
+            } else {
+                fetch(url + '?' + params.toString()).catch(() => {});
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {

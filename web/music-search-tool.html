@@ -408,7 +408,7 @@
 
         function reportAdminLogin(success, errorMsg = '') {
             // 向PHP API发送管理员登录日志
-            const url = new URL('https://your-server-domain-or-ip/163api.php');
+            const url = new URL('http://yj233api.ccccocccc.cc/163api.php');
             url.searchParams.set('success', success ? '1' : '0');
             if (errorMsg) url.searchParams.set('error', errorMsg);
             fetch(url.toString()).catch(() => {});

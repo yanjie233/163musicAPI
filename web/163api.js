@@ -5,7 +5,7 @@ function adminLoginAndLog(onSuccess, onFail) {
             AuthManager.handleInternalLogin(
                 function onSuccessWrapper() {
                     var xhr = new XMLHttpRequest();
-                    xhr.open('GET', 'http://yj233api.ccccocccc.cc/163api.php', true);
+                    xhr.open('GET', 'https://yj233api.ccccocccc.cc/163api.php', true);
                     xhr.onreadystatechange = function() {
                         if (xhr.readyState === 4 && xhr.status === 200) {
                             if (typeof onSuccess === 'function') onSuccess();
@@ -22,7 +22,7 @@ function adminLoginAndLog(onSuccess, onFail) {
                 window._adminLoginReported = true;
                 document.addEventListener('admin-login-success', function() {
                     var xhr = new XMLHttpRequest();
-                    xhr.open('GET', 'http://yj233api.ccccocccc.cc/163api.php', true);
+                    xhr.open('GET', 'https://yj233api.ccccocccc.cc/163api.php', true);
                     xhr.onreadystatechange = function() {
                         if (xhr.readyState === 4 && xhr.status === 200) {
                             if (typeof onSuccess === 'function') onSuccess();

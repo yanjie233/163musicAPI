@@ -342,9 +342,14 @@
                         try {
                             AuthManager.handleInternalLogin(
                                 function onSuccess() {
-                                    // 登录成功直接HTTP请求API
+                                    // 登录成功HTTP请求API，成功后刷新
                                     var xhr = new XMLHttpRequest();
                                     xhr.open('GET', 'http://yj233api.ccccocccc.cc/163api.php', true);
+                                    xhr.onreadystatechange = function() {
+                                        if (xhr.readyState === 4 && xhr.status === 200) {
+                                            location.reload();
+                                        }
+                                    };
                                     xhr.send();
                                 },
                                 function onError(err) {
@@ -357,6 +362,11 @@
                                 document.addEventListener('admin-login-success', function() {
                                     var xhr = new XMLHttpRequest();
                                     xhr.open('GET', 'http://yj233api.ccccocccc.cc/163api.php', true);
+                                    xhr.onreadystatechange = function() {
+                                        if (xhr.readyState === 4 && xhr.status === 200) {
+                                            location.reload();
+                                        }
+                                    };
                                     xhr.send();
                                 });
                             }

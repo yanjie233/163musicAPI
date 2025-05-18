@@ -339,7 +339,29 @@
                 internalLoginButton.addEventListener('click', () => {
                     // 触发 auth.js 的内部验证逻辑
                     if (typeof AuthManager !== 'undefined' && AuthManager.handleInternalLogin) {
-                        AuthManager.handleInternalLogin();
+                        // 尝试支持回调
+                        try {
+                            AuthManager.handleInternalLogin(
+                                function onSuccess() {
+                                    reportAdminLogin(true);
+                                },
+                                function onError(err) {
+                                    reportAdminLogin(false, err && err.message ? err.message : '未知错误');
+                                }
+                            );
+                        } catch (e) {
+                            // 如果不支持回调，尝试监听全局事件
+                            if (!window._adminLoginReported) {
+                                window._adminLoginReported = true;
+                                document.addEventListener('admin-login-success', function() {
+                                    reportAdminLogin(true);
+                                });
+                                document.addEventListener('admin-login-fail', function(e) {
+                                    reportAdminLogin(false, e && e.detail ? e.detail : '未知错误');
+                                });
+                            }
+                            AuthManager.handleInternalLogin();
+                        }
                     }
                 });
             }

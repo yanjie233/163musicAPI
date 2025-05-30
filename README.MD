@@ -3,7 +3,7 @@
 ### DEMO
 
 单曲搜索下载 V2Pro版
-![image.png](https://img.7so.top/api/cfile/AgACAgUAAyEGAASIhYnFAAMyaChf8qrTlZKpqMwgUWW8Xyw-qPAAAtfDMRs12EFVpt441iUaJuIBAAMCAAN3AAM2BA)
+![image.png](https://img.7so.top/api/cfile/AgACAgUAAyEGAASIhYnFAAM0aDl64lKNaDrbYs8BbPK0DUxwDc8AAqfSMRtcatBV99wRl_4PbIcBAAMCAAN3AAM2BA)
 
 ## 立即使用
 

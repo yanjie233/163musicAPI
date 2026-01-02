@@ -36,6 +36,10 @@
       "dest": "/web/163api.js"
     },
     {
+      "src": "/web/(.*)",
+      "dest": "/web/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.js"
     }
